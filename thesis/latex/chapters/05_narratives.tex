@@ -1,0 +1,58 @@
+\chapter{Narrative Analysis}
+\label{ch:narr}
+
+\section{Goal}
+
+Detection accuracy alone does not explain \emph{what} misinformation is about.
+For public-health communication, stakeholders need a map of recurring narratives---especially those linked to vaccine hesitancy and broader COVID distrust.
+This chapter addresses \textbf{RQ3} using BERTopic on documents labeled as misinformation.
+
+\section{Setup}
+
+We aggregate misinformation texts from CONSTRAINT and MMCoVaR ($N=5{,}752$ after filtering).
+Long news bodies are truncated to 800 characters for embedding efficiency.
+Documents are embedded with Sentence-Transformers \texttt{all-MiniLM-L6-v2} and clustered with BERTopic (\texttt{min\_topic\_size}=15).
+We obtain dozens of fine-grained topics; Table~\ref{tab:taxonomy} reports the top themes after qualitative renaming.
+
+\section{Taxonomy of dominant narratives}
+
+\begin{table}[H]
+\centering
+\caption{Top misinformation / hesitancy-related narratives (BERTopic + qualitative labels).}
+\label{tab:taxonomy}
+\small
+\begin{tabular}{clrp{5.2cm}}
+\toprule
+\# & Theme & Size & Interpretation \\
+\midrule
+1 & Case/death sensationalism & 520 & Inflated or misleading severity narratives \\
+2 & Politicized pandemic framing & 500 & Partisan blame / political weaponization \\
+3 & Contested public measures (masks) & 214 & Contestation of NPIs mixed with rumor \\
+4 & China / lab-origin claims & 188 & Origin conspiracies and geopolitical blame \\
+5 & Miracle-cure / unproven drugs & 116 & HCQ and similar treatment myths \\
+6 & Elite / Bill Gates vaccine distrust & 112 & Agenda and control conspiracies \\
+7 & Hospital-overload visuals & 97 & Misleading crisis imagery \\
+8 & Schools / children anxieties & 82 & Child-focused risk rumors \\
+9 & Folk home remedies & 79 & Salt/steam/garlic ``cures'' \\
+10 & Travel-ban rumors & 76 & False policy / mobility claims \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Approximately 2{,}000 documents fall into an outlier topic (too unique or noisy for stable clustering), which is expected for short social posts.
+
+\section{Implications for vaccine hesitancy}
+
+Although not every theme is narrowly about vaccine injection side effects, the taxonomy reveals a \emph{multi-narrative ecosystem} that can fuel hesitancy indirectly:
+\begin{itemize}
+  \item Distrust of institutions and elites (Theme 6) undermines confidence in vaccine recommendations.
+  \item Miracle-cure narratives (Theme 5) reduce perceived need for vaccination.
+  \item Sensational harm and hospital imagery (Themes 1, 7) amplify fear responses.
+  \item Child/school themes (Theme 8) specifically target parental decision-making.
+\end{itemize}
+For communication campaigns, these clusters suggest differentiated messaging rather than a single ``correct the side-effect myth'' strategy.
+
+\section{Link to the detection pipeline}
+
+Operationally, the classifier can flag misinformation content at scale; BERTopic then summarizes \emph{what} is being flagged.
+Together they form a monitoring loop useful for public-health analysts and platform trust-and-safety teams, even when multimodal fusion does not beat text on every dataset.

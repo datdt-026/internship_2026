@@ -1,0 +1,104 @@
+\chapter{Experiments and Results}
+\label{ch:exp}
+
+\section{Implementation details}
+
+All experiments are implemented in PyTorch with Hugging Face Transformers.
+The code repository provides scripts for dataset download/preparation, training, evaluation, ablation, and topic modeling.
+Random seed is fixed to 42 for split reproducibility on MMCoVaR; CONSTRAINT uses the official splits.
+
+\section{Experiment A: CONSTRAINT text baseline}
+\label{sec:exp-constraint}
+
+\subsection{Setup}
+We train the RoBERTa text classifier on CONSTRAINT train/val splits and evaluate on test.
+Early stopping selects the checkpoint with best validation macro-F1.
+We also train a classical TF--IDF (1--2 grams) + logistic regression baseline on the same splits.
+
+\subsection{Results}
+Table~\ref{tab:constraint-results} reports test metrics.
+RoBERTa reaches \textbf{macro-F1 $= 0.9719$} versus TF--IDF+LR at $0.9224$ (about $+5$ F1 points).
+
+\begin{table}[H]
+\centering
+\caption{CONSTRAINT test results (classical vs RoBERTa).}
+\label{tab:constraint-results}
+\begin{tabular}{lcccc}
+\toprule
+Model & Accuracy & Precision & Recall & Macro-F1 \\
+\midrule
+TF--IDF + LogReg & 0.9224 & 0.9222 & 0.9230 & 0.9224 \\
+RoBERTa-base (text) & 0.9720 & 0.9717 & 0.9723 & \textbf{0.9719} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Error analysis}
+On CONSTRAINT test, RoBERTa makes $60$ errors ($38$ FP, $22$ FN).
+Failures concentrate on short/ambiguous posts, stylistic false alarms, and subtle hedged claims
+(see \texttt{results/error\_analysis/roberta\_test\_errors.md}).
+
+\subsection{Training dynamics}
+Validation macro-F1 improves rapidly in the first epochs (e.g., $\approx 0.953$ after epoch 1) and peaks near $0.975$ before early stopping.
+Training loss decreases from $\approx 0.23$ to $<0.05$, consistent with successful fine-tuning without requiring architectural novelty.
+
+\section{Experiment B: MMCoVaR multimodal ablation}
+\label{sec:exp-mmcovar}
+
+\subsection{Setup}
+On the multimodal MMCoVaR subset, we train three models under identical splits:
+\begin{enumerate}
+  \item Text-only RoBERTa
+  \item Image-only CLIP (frozen encoder + linear head)
+  \item Late fusion (RoBERTa CLS $\oplus$ CLIP image embedding + MLP)
+\end{enumerate}
+
+\subsection{Results}
+Table~\ref{tab:ablation} summarizes test performance.
+
+\begin{table}[H]
+\centering
+\caption{MMCoVaR test ablation (text / image / late fusion).}
+\label{tab:ablation}
+\begin{tabular}{lcccc}
+\toprule
+Modality & Accuracy & Precision & Recall & Macro-F1 \\
+\midrule
+Text-only   & 0.9688 & 0.9658 & 0.9604 & 0.9630 \\
+Image-only  & 0.5969 & 0.5550 & 0.5613 & 0.5542 \\
+Late fusion & 0.9688 & 0.9632 & 0.9632 & \textbf{0.9632} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Interpretation}
+\begin{itemize}
+  \item \textbf{Text dominates.} News title+body carries most of the reliability signal; text-only F1 is already $\approx 0.963$.
+  \item \textbf{Images alone are weak.} Thumbnails and illustrative photos often do not encode factual veracity; image-only F1 $\approx 0.554$ is near a weak baseline for imbalanced binary classification.
+  \item \textbf{Fusion $\approx$ text.} Late fusion matches text (F1 $0.9632$ vs $0.9630$) without a meaningful gain.
+  This does \emph{not} invalidate multimodality in general; it indicates that, on this news subset, visual features add little complementary signal under late fusion with a frozen CLIP tower.
+\end{itemize}
+
+Answering \textbf{RQ1}: late fusion does not clearly outperform text-only on MMCoVaR.
+Answering \textbf{RQ2}: text contributes substantially more than image under our ablation.
+
+\section{Error analysis (qualitative)}
+
+Manual inspection of residual errors suggests recurring patterns:
+\begin{itemize}
+  \item \textbf{Borderline satire / opinion:} stylistically extreme but not clearly false factual claims.
+  \item \textbf{Context-dependent claims:} statements that are true only under narrow conditions.
+  \item \textbf{Visual-text mismatch:} cases where an image is misleading but the textual body is carefully hedged---rare in MMCoVaR news bodies, which are long and text-heavy (average length $>$ 6k characters), further explaining text dominance.
+\end{itemize}
+
+\section{Reproducibility}
+
+Key commands (see project documentation for details):
+\begin{verbatim}
+python scripts/prepare_constraint_splits.py
+python -m src.train --config configs/default.yaml --modality text
+python scripts/download_mmcovar_images.py
+python scripts/prepare_mmcovar_splits.py
+bash scripts/run_mmcovar_ablation.sh
+\end{verbatim}
+Artifacts are stored under \texttt{results/} and \texttt{checkpoints/}.

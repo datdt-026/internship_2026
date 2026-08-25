@@ -1,0 +1,141 @@
+\chapter{Methodology}
+\label{ch:method}
+
+\section{Overview}
+
+Figure~\ref{fig:pipeline} summarizes the pipeline:
+(1)~dataset preparation and label normalization;
+(2)~modality-specific encoders;
+(3)~classification heads (text / image / late fusion);
+(4)~evaluation;
+(5)~BERTopic narrative analysis on misinformation texts.
+
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  font=\footnotesize,
+  box/.style={draw, rounded corners=2pt, align=center, inner sep=4pt,
+              minimum height=0.95cm, text width=2.4cm},
+  arrow/.style={-{Latex}, thick},
+  node distance=0.55cm and 0.45cm
+]
+\node[box, fill=blue!8] (data) {Raw datasets\\CONSTRAINT / MMCoVaR};
+\node[box, fill=green!8, right=of data] (prep) {Clean + label map\\train/val/test JSONL};
+\node[box, fill=orange!10, right=of prep] (enc) {Encoders\\RoBERTa / CLIP};
+\node[box, fill=red!8, right=of enc] (clf) {Classifier\\text / image / fusion};
+\node[box, fill=purple!8, below=of clf] (eval) {Metrics\\Acc / P / R / F1};
+\node[box, fill=yellow!15, below=of prep] (topic) {BERTopic\\narrative taxonomy};
+
+\draw[arrow] (data) -- (prep);
+\draw[arrow] (prep) -- (enc);
+\draw[arrow] (enc) -- (clf);
+\draw[arrow] (clf) -- (eval);
+\draw[arrow] (prep) -- (topic);
+\end{tikzpicture}%
+}
+\caption{End-to-end research pipeline implemented in this thesis.}
+\label{fig:pipeline}
+\end{figure}
+
+\section{Label schema}
+
+All experiments use a binary schema:
+\begin{itemize}
+  \item \texttt{credible} $\leftrightarrow$ class $0$
+  \item \texttt{misinfo} $\leftrightarrow$ class $1$
+\end{itemize}
+CONSTRAINT labels \texttt{real}/\texttt{fake} map to \texttt{credible}/\texttt{misinfo}.
+MMCoVaR \texttt{reliability}$=1$ (reliable) maps to \texttt{credible}; \texttt{reliability}$=0$ maps to \texttt{misinfo}.
+
+\section{Datasets}
+
+\subsection{CONSTRAINT COVID-19 Fake News (text track)}
+\label{sec:constraint}
+
+We use the public Hugging Face distribution of the CONSTRAINT English dataset~\cite{patwa2021fighting}.
+After cleaning (URL stripping, whitespace normalization) we obtain 10{,}700 samples with official splits (Table~\ref{tab:constraint-stats}).
+
+\begin{table}[H]
+\centering
+\caption{CONSTRAINT dataset statistics after preprocessing.}
+\label{tab:constraint-stats}
+\begin{tabular}{lrrrr}
+\toprule
+Split & $N$ & Credible & Misinfo & Avg.\ text length \\
+\midrule
+Train & 6420 & 3360 & 3060 & 165.1 \\
+Val   & 2140 & 1120 & 1020 & 162.8 \\
+Test  & 2140 & 1120 & 1020 & 168.1 \\
+\midrule
+All   & 10700 & 5600 & 5100 & 165.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{MMCoVaR news (multimodal track)}
+\label{sec:mmcovar}
+
+MMCoVaR provides vaccine-focused news with image URLs~\cite{chen2021mmcovar}.
+We download images from the \texttt{image} column and retain only articles with a successfully retrieved local image.
+Text is formed by concatenating \texttt{title} and \texttt{body\_text}.
+Stratified splits (70/15/15) yield the statistics in Table~\ref{tab:mmcovar-stats}.
+Of 2{,}592 candidate URLs, 2{,}131 images were successfully downloaded (461 failures due to dead links / timeouts), which is reported as a data-quality limitation.
+
+\begin{table}[H]
+\centering
+\caption{MMCoVaR multimodal subset used in experiments (all rows have images).}
+\label{tab:mmcovar-stats}
+\begin{tabular}{lrrrr}
+\toprule
+Split & $N$ & Credible & Misinfo & With image \\
+\midrule
+Train & 1491 & 1034 & 457 & 1491 \\
+Val   & 320  & 222  & 98  & 320 \\
+Test  & 320  & 222  & 98  & 320 \\
+\midrule
+All   & 2131 & 1478 & 653 & 2131 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Models}
+
+\subsection{Text-only classifier}
+We fine-tune RoBERTa-base~\cite{liu2019roberta}.
+Let $\mathbf{h}_{\mathrm{CLS}} \in \mathbb{R}^{d_t}$ be the CLS representation.
+A linear head predicts class logits:
+\[
+\mathbf{z}_{\mathrm{text}} = W_t\,\mathrm{Dropout}(\mathbf{h}_{\mathrm{CLS}}) + b_t.
+\]
+
+\subsection{Image-only classifier}
+We encode images with CLIP ViT-B/32~\cite{radford2021clip}.
+The vision backbone is frozen; a linear head is trained on the projected image embedding $\mathbf{e}_v \in \mathbb{R}^{d_v}$:
+\[
+\mathbf{z}_{\mathrm{img}} = W_v\,\mathrm{Dropout}(\mathbf{e}_v) + b_v.
+\]
+
+\subsection{Late fusion classifier}
+We concatenate text CLS and CLIP image embeddings and classify with a two-layer MLP:
+\[
+\mathbf{z}_{\mathrm{fusion}} = \mathrm{MLP}\big([\mathbf{h}_{\mathrm{CLS}}; \mathbf{e}_v]\big).
+\]
+This implements \emph{late fusion}: modalities are encoded separately, then combined.
+
+\section{Training protocol}
+
+Unless noted otherwise:
+\begin{itemize}
+  \item Optimizer: AdamW, learning rate $2\times10^{-5}$, weight decay $0.01$
+  \item Max text length: 256 tokens
+  \item Epochs: up to 5 with early stopping on validation macro-F1 (patience 2)
+  \item Batch size: 16 (CONSTRAINT text); 8 (MMCoVaR multimodal, memory)
+  \item Device: Apple MPS / CUDA when available
+\end{itemize}
+We report Accuracy, Precision, Recall, and macro-F1 on the held-out test set.
+
+\section{Narrative analysis protocol}
+
+We collect all documents labeled \texttt{misinfo} from CONSTRAINT and MMCoVaR (5{,}752 texts after filtering short strings), embed them with \texttt{all-MiniLM-L6-v2}, and fit BERTopic with \texttt{min\_topic\_size}=15.
+Top topics are manually interpreted into a narrative taxonomy (Chapter~\ref{ch:narr}).

@@ -1,0 +1,45 @@
+\chapter{Discussion and Limitations}
+\label{ch:disc}
+
+\section{Discussion of main findings}
+
+\subsection{Strong text baselines are necessary}
+CONSTRAINT results show that carefully fine-tuned RoBERTa already solves a large fraction of the English COVID fake-news classification problem under this label distribution.
+Any multimodal claim of improvement must beat such a strong text ceiling---which MMCoVaR late fusion did not meaningfully do.
+
+\subsection{Why fusion did not help on MMCoVaR}
+Several factors likely contribute:
+\begin{enumerate}
+  \item \textbf{Text richness:} news bodies are long and informationally dense; images are often decorative.
+  \item \textbf{Label generation:} publisher reliability is a coarse proxy; visual style may correlate weakly with publisher class.
+  \item \textbf{Fusion design:} late fusion with a frozen CLIP tower may under-adapt visual features to the veracity task.
+  \item \textbf{Missing-image noise:} some downloads are truncated/corrupt and are replaced by placeholders, injecting noise into the image stream.
+\end{enumerate}
+These observations are scientifically valuable: they caution against assuming multimodality always helps.
+
+\subsection{Narratives beyond ``vaccine side effects''}
+Topic analysis shows post-pandemic discourse mixes medical myths, politics, geopolitics, and lifestyle remedies.
+Detection systems aimed only at biomedical claim types may miss adjacent narratives that still drive hesitancy.
+
+\section{Limitations}
+
+\begin{itemize}
+  \item \textbf{Platform gap:} the proposal mentions X and TikTok; experiments use CONSTRAINT social text and MMCoVaR news due to API and time constraints.
+  \item \textbf{No audio modality:} Whisper-based TikTok audio analysis is future work.
+  \item \textbf{English-centric data:} results may not transfer to Vietnamese or multilingual settings without additional data.
+  \item \textbf{Image download incompleteness:} $\approx 18\%$ of MMCoVaR image URLs failed.
+  \item \textbf{Label semantics:} publisher-level reliability $\neq$ claim-level fact-check for every sentence.
+  \item \textbf{BERTopic instability:} topic solutions vary with seeds/parameters; taxonomy requires human validation.
+\end{itemize}
+
+\section{Ethical considerations}
+
+Misinformation detectors can support public-health response but also risk over-blocking legitimate debate, satire, or minority scientific viewpoints.
+We recommend human-in-the-loop review, transparent error analysis, and clear communication that model outputs are decision-support---not definitive truth judgments.
+Training data may encode geographic and political biases; deployment should include fairness checks.
+
+\section{Threats to validity}
+
+Construct validity is threatened if ``misinfo'' labels conflate low-quality journalism with false claims.
+External validity is limited by English news/social text from 2020--2021.
+Internal validity of ablation comparisons is strengthened by shared splits and seeds, but hyperparameter search was intentionally limited for timeline reasons.

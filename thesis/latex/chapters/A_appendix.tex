@@ -1,0 +1,39 @@
+\chapter{Appendix}
+\label{ch:appendix}
+
+\section{Software environment}
+
+\begin{itemize}
+  \item Python 3.10+ / project virtualenv
+  \item PyTorch, Transformers, Datasets
+  \item BERTopic, sentence-transformers, UMAP, HDBSCAN
+\end{itemize}
+
+\section{Key repository paths}
+
+\begin{verbatim}
+thesis/
+  configs/default.yaml
+  configs/mmcovar.yaml
+  src/train.py
+  src/evaluate.py
+  src/topics.py
+  scripts/prepare_constraint_splits.py
+  scripts/download_mmcovar_images.py
+  scripts/prepare_mmcovar_splits.py
+  scripts/run_mmcovar_ablation.sh
+  results/text_baseline_results.json
+  results/mmcovar_ablation_summary.json
+  results/topics/TAXONOMY_THESIS.md
+  latex/main.tex
+\end{verbatim}
+
+\section{Additional quantitative notes}
+
+CONSTRAINT label map: \texttt{real}$\rightarrow$\texttt{credible}, \texttt{fake}$\rightarrow$\texttt{misinfo}.\\
+MMCoVaR label map: \texttt{reliability=1}$\rightarrow$\texttt{credible}, \texttt{reliability=0}$\rightarrow$\texttt{misinfo}.
+
+\section{Declaration}
+
+I declare that this thesis is my own work, conducted under the supervision of the listed supervisor, and that all sources are acknowledged.
+Experimental results are reproducible from the accompanying codebase and configuration files.

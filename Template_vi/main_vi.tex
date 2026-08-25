@@ -1,0 +1,490 @@
+% ============================================================
+% BAN LATEX TIENG VIET — CHI DE DOC HIEU / LUYEN BAO VE
+% Ban nop chinh thuc: Template/ (tieng Anh)
+% Compile (Overleaf): pdfLaTeX + biber
+% ============================================================
+
+\documentclass[12pt, a4paper]{report}
+
+\usepackage[a4paper,
+            left=2.5cm,
+            right=2.5cm,
+            top=2.5cm,
+            bottom=2.5cm,
+            bindingoffset=0cm]{geometry}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{paralist}
+\usepackage{csquotes}
+\usepackage[backend=biber, style=numeric, sorting=none]{biblatex}
+\addbibresource{biblio.bib}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\studentname\ -- \studentid}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---------- Thong tin sinh vien ----------
+\newcommand{\studentname}{Đỗ Thành Đạt}
+\newcommand{\studentid}{M23.ICT.002}
+\newcommand{\studentemail}{datdt.m23ict@usth.edu.vn}
+\newcommand{\internalSupervisor}{Giang Anh Tuan}
+\newcommand{\externalSupervisor}{}
+\newcommand{\externalSupervisorAffiliation}{}
+\newcommand{\reporttitle}{Giải mã do dự tiêm vaccine hậu đại dịch:\\
+Tiếp cận Transformer đa phương thức đối với động lực\\
+thông tin sai lệch trên mạng xã hội}
+\newcommand{\reporttitleEN}{Decoding the Post-Pandemic Vaccine Hesitancy: A Multimodal Transformer Approach to Misinformation Dynamics on Social Media}
+\newcommand{\reportdate}{\today}
+\newcommand{\academicyear}{2025--2026}
+
+\begin{document}
+
+% ===================== BIA =====================
+\begin{titlepage}
+\centering
+{\Large\bfseries Đại học Khoa học và Công nghệ Hà Nội (USTH)\par}
+{\large\bfseries Khoa Công nghệ Thông tin và Truyền thông\par}
+\vspace{0.5cm}
+\includegraphics[width=0.25\textwidth]{USTH-logo.png}\par
+\vspace{1.5cm}
+{\LARGE\bfseries LUẬN VĂN THẠC SĨ\par}
+\vspace{0.4cm}
+{\large\itshape (Bản tiếng Việt --- chỉ để đọc hiểu; bản nộp chính thức bằng tiếng Anh)\par}
+\vspace{1.2cm}
+{\LARGE\bfseries \reporttitle\par}
+\vspace{0.8cm}
+{\small \reporttitleEN\par}
+\vspace{1.5cm}
+{\large {\bfseries Sinh viên:} \studentname\par}
+{\large {\bfseries Mã SV:} \studentid\par}
+{\large {\bfseries Email:} \studentemail\par}
+\vspace{1.2cm}
+{\large {\bfseries Giảng viên hướng dẫn:} \internalSupervisor\par}
+\vspace{0.8cm}
+{\large {\bfseries Năm học:} \academicyear\par}
+{\large {\bfseries Ngày:} \reportdate\par}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+\begin{abstract}
+Sau COVID-19, do dự tiêm vaccine (\emph{vaccine hesitancy}) vẫn bị khuếch đại bởi thông tin sai lệch trên mạng xã hội và báo chí số.
+Nội dung hiện nay thường đa phương thức (văn bản + hình ảnh), nên bộ phân loại chỉ dựa vào text có thể thiếu tín hiệu thị giác.
+Luận văn này xây dựng pipeline Transformer ở mức nội dung để phát hiện misinformation liên quan COVID-19/vaccine, đồng thời phân tích các chủ đề tường thuật gắn với do dự tiêm hậu đại dịch.
+
+Trên bộ CONSTRAINT, RoBERTa đạt macro-F1~$0.9719$ (accuracy~$0.9720$), vượt baseline cổ điển TF--IDF + hồi quy logistic ($0.9224$).
+Trên MMCoVaR (tin tức có ảnh), ablation cho thấy text chiếm ưu thế (macro-F1~$\approx 0.963$), ảnh yếu ($\approx 0.554$), và late fusion gần như bằng text ($\approx 0.963$) --- ảnh gần như không mang lại lợi ích rõ.
+BERTopic trên $5{,}752$ văn bản misinfo tạo taxonomy chủ đề: số ca/tử vong giật gân, chính trị hóa, khẩu trang, nguồn gốc lab/China, thuốc ``thần'', Bill Gates, hình ảnh bệnh viện, trẻ em/trường học, bài thuốc dân gian, tin đồn cấm đi lại.
+
+Đóng góp gồm pipeline tái lập được, bằng chứng đóng góp từng modality, và bản đồ narrative hỗ trợ truyền thông y tế.
+TikTok, Whisper và crawl nền tảng trực tiếp được ghi nhận như hạn chế / hướng nghiên cứu tiếp theo.
+\end{abstract}
+
+\clearpage
+
+\chapter*{Lời cảm ơn}
+\addcontentsline{toc}{chapter}{Lời cảm ơn}
+Tôi xin cảm ơn giảng viên hướng dẫn Giang Anh Tuan vì sự định hướng trong kỳ thực tập và luận văn.
+Xin cảm ơn USTH và chương trình Thạc sĩ ICT đã hỗ trợ học thuật.
+
+\clearpage
+\tableofcontents
+\clearpage
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% ===================== CHUONG 1 =====================
+\chapter{Mở đầu}
+\label{chap:introduction}
+
+\section{Bối cảnh}
+\label{sec:context}
+
+Đại dịch COVID-19 đi kèm \emph{infodemic}: dòng chảy nhanh của thông tin đúng, sai và gây hiểu nhầm trên môi trường số~\cite{who2020infodemic}.
+Ngay cả sau giai đoạn cấp tính, do dự tiêm vaccine --- trì hoãn hoặc từ chối tiêm dù vaccine sẵn có~\cite{macdonald2015hesitancy} --- vẫn là thách thức y tế công cộng.
+Mạng xã hội và báo chí số làm tăng tốc lan truyền các khẳng định về an toàn, hiệu quả, bắt buộc tiêm, cùng các lời giải thích mang tính âm mưu.
+
+Nội dung đương đại vốn đa phương thức.
+Một bài viết có thể kèm caption thận trọng nhưng ảnh gây sợ hãi; một bài báo dài có thể mang luận điểm thực tế trong khi thumbnail định hướng cảm xúc.
+Bộ phân loại chỉ dùng text dễ bỏ sót tín hiệu hình ảnh; mô hình chỉ dùng ảnh dễ bỏ qua khẳng định ngôn ngữ đang mang thông tin sai.
+Luận văn vì thế nghiên cứu tiếp cận Transformer đa phương thức cho phát hiện misinformation COVID/vaccine, và bổ sung phân tích chủ đề tường thuật liên quan do dự tiêm.
+
+Bài toán được đặt ở mức \emph{nội dung}: cho text và ảnh tùy chọn, dự đoán \texttt{credible} hoặc \texttt{misinfo}.
+Hướng này bổ trợ cho mô hình lan truyền trên đồ thị người dùng và phù hợp sàng lọc thực tế của nhà phân tích.
+
+\section{Đóng góp}
+\label{sec:contribution}
+
+Các đóng góp chính gồm:
+\begin{enumerate}
+  \item Pipeline nghiên cứu đa phương thức có thể tái lập (chuẩn bị dữ liệu, huấn luyện, đánh giá, phân tích chủ đề).
+  \item Baseline text mạnh trên CONSTRAINT bằng RoBERTa (macro-F1~$0.9719$), kèm so sánh TF--IDF + hồi quy logistic.
+  \item Nghiên cứu ablation trên MMCoVaR: text / ảnh (CLIP) / late fusion, định lượng đóng góp từng modality.
+  \item Taxonomy chủ đề misinfo hậu đại dịch từ BERTopic, phục vụ diễn giải truyền thông.
+\end{enumerate}
+
+So với đề xuất ban đầu nhắm X và TikTok kèm âm thanh (Whisper), thời gian thực tập và hạn chế API dẫn tới phạm vi thực tế (survival scope) vẫn giữ lõi khoa học: benchmark text, ablation đa phương thức, và phân tích narrative.
+
+\section{Bố cục báo cáo}
+\label{sec:plan}
+
+Chương~\ref{chap:related-works} trình bày các công trình liên quan.
+Chương~\ref{chap:contribution} mô tả dữ liệu, mô hình và quy trình.
+Chương~\ref{chap:experiments} báo cáo thực nghiệm, ablation và phân tích lỗi.
+Chương~\ref{chap:conclusion} tóm tắt, nêu hạn chế và hướng phát triển.
+
+% ===================== CHUONG 2 =====================
+\chapter{Các công trình liên quan}
+\label{chap:related-works}
+
+\section{Tổng quan tài liệu}
+\label{sec:literature-review}
+
+\subsection{Do dự tiêm và misinformation trực tuyến}
+
+Do dự tiêm được WHO xem là rào cản lớn với chương trình tiêm chủng~\cite{macdonald2015hesitancy}.
+Trong COVID-19, các khẳng định sai về thành phần vaccine, vô sinh, chip, và phản ứng phụ phóng đại lan rộng.
+Shu và cộng sự~\cite{shu2017fake} khảo sát phát hiện tin giả trên mạng xã hội, phân biệt hướng dựa trên nội dung, ngữ cảnh xã hội, và lai.
+Luận văn theo hướng \emph{content-based}: phân loại thông điệp trước khi mô hình hóa đồ thị lan truyền.
+
+Các nguồn dữ liệu y tế như CoAID~\cite{cui2020coaid} và ANTi-Vax~\cite{hayawi2022antivax} cung cấp nhãn COVID/vaccine.
+ANTi-Vax chủ yếu phát hành ID tweet; việc hydrate phụ thuộc API và tweet có thể bị xóa.
+Do đó ưu tiên các bộ có đủ text (và ảnh nếu có) để tái lập trong thời gian thực tập.
+
+\subsection{Benchmark tin giả COVID-19}
+
+Patwa và cộng sự~\cite{patwa2021fighting} công bố bộ CONSTRAINT gồm bài đăng tiếng Anh gắn nhãn real/fake.
+Đây là chuẩn phổ biến cho phân loại text bằng Transformer.
+Luận văn dùng bản công khai trên Hugging Face và map nhãn sang schema \texttt{credible}/\texttt{misinfo}.
+
+\subsection{Phát hiện misinformation đa phương thức}
+
+Các bộ như Fakeddit~\cite{nakamura2020fakeddit} cho thấy kết hợp text và ảnh hữu ích khi hai tín hiệu tương tác.
+Với COVID, MM-COVID~\cite{li2020mmcovid} và MMCoVaR~\cite{chen2021mmcovar} cung cấp nội dung đa phương thức; MMCoVaR tập trung vaccine và có URL ảnh kèm nhãn độ tin cậy nhà xuất bản.
+Luận văn dùng phần tin tức của MMCoVaR để thí nghiệm multimodal mà không cần hydrate tweet.
+
+Về kiến trúc, late fusion nối embedding các modality trước khi phân loại; cross-attention trộn token phức tạp hơn.
+Late fusion đơn giản, chịu được thiếu modality, phù hợp ràng buộc thời gian; cross-attention để dành cho hướng sau.
+
+\subsection{Encoder Transformer cho text và ảnh}
+
+Transformer~\cite{vaswani2017attention} là nền tảng NLP hiện đại.
+BERT~\cite{devlin2019bert} và RoBERTa~\cite{liu2019roberta} cho biểu diễn ngữ cảnh dùng rộng rãi trong phân loại.
+CLIP~\cite{radford2021clip} học không gian ảnh--ngôn ngữ; tháp thị giác cho đặc trưng ảnh chuyển giao, thường đóng băng khi fine-tune downstream.
+
+\subsection{Mô hình chủ đề cho phân tích narrative}
+
+Ngoài metric độ chính xác, bên truyền thông cần chủ đề diễn giải được.
+BERTopic~\cite{grootendorst2022bertopic} gom cụm embedding (ví dụ Sentence-BERT~\cite{reimers2019sentence}) và trích từ khóa theo class-based TF--IDF.
+Luận văn dùng BERTopic để dựng taxonomy sau các thí nghiệm phát hiện.
+
+\section{So sánh với các hướng hiện có}
+\label{sec:comparison}
+
+Nhiều công trình báo cáo độ chính xác cao trên benchmark text COVID, nhưng ít hơn về ablation tách biệt đóng góp text/ảnh trên cùng split vaccine multimodal.
+Nhãn độ tin cậy nhà xuất bản (MMCoVaR) thực dụng nhưng thô hơn fact-check từng claim; luận văn nêu rõ đánh đổi này.
+Dataset chỉ có ID khó tái lập dưới API hiện tại; lựa chọn CONSTRAINT và MMCoVaR ưu tiên pipeline end-to-end.
+
+So với kiến trúc cross-attention phức tạp, luận văn đánh giá late fusion trong suốt với CLIP đóng băng để trả lời câu hỏi cụ thể: thêm ảnh có cải thiện RoBERTa mạnh trên subset tin tức này không?
+Kết quả thực nghiệm cho thấy gần như không --- kết quả ``âm'' nhưng hữu ích, tránh phóng đại lợi ích multimodal.
+
+Cuối cùng, chỉ phát hiện không đủ để giải thích cấu trúc diễn ngôn.
+Ghép classifier với BERTopic đáp ứng nhu cầu bản đồ chủ đề gắn hesitancy.
+
+% ===================== CHUONG 3 =====================
+\chapter{Đóng góp phương pháp}
+\label{chap:contribution}
+
+\section{Phương pháp luận}
+\label{sec:methodology}
+
+\subsection{Tổng quan pipeline}
+
+Pipeline gồm năm bước: (1)~chuẩn bị dữ liệu và chuẩn hóa nhãn;
+(2)~encoder theo modality;
+(3)~đầu phân loại text / ảnh / late fusion;
+(4)~đánh giá Acc / P / R / macro-F1;
+(5)~BERTopic trên văn bản misinfo.
+
+Hình thức hóa: \(x=(t,v)\), học \(f_\theta(x)\rightarrow y\in\{0,1\}\) với \(0=\texttt{credible}\), \(1=\texttt{misinfo}\).
+
+\subsection{Schema nhãn}
+
+\begin{itemize}
+  \item \texttt{credible} \(\leftrightarrow\) lớp \(0\)
+  \item \texttt{misinfo} \(\leftrightarrow\) lớp \(1\)
+\end{itemize}
+CONSTRAINT: \texttt{real}/\texttt{fake} \(\rightarrow\) \texttt{credible}/\texttt{misinfo}.
+MMCoVaR: \texttt{reliability}$=1$ \(\rightarrow\) \texttt{credible}; \(=0\) \(\rightarrow\) \texttt{misinfo}.
+
+\subsection{CONSTRAINT (nhánh text)}
+
+Sau làm sạch (bỏ URL, chuẩn hóa khoảng trắng) có $10{,}700$ mẫu với split chính thức (Bảng~\ref{tab:constraint-stats}).
+
+\begin{table}[htbp]
+\centering
+\caption{Thống kê CONSTRAINT sau tiền xử lý.}
+\label{tab:constraint-stats}
+\begin{tabular}{lrrrr}
+\hline
+Split & $N$ & Credible & Misinfo & Độ dài TB \\
+\hline
+Train & 6420 & 3360 & 3060 & 165.1 \\
+Val   & 2140 & 1120 & 1020 & 162.8 \\
+Test  & 2140 & 1120 & 1020 & 168.1 \\
+\hline
+All   & 10700 & 5600 & 5100 & 165.2 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{MMCoVaR news (nhánh multimodal)}
+
+Tải ảnh từ cột \texttt{image}, giữ bài có file ảnh local.
+Text = \texttt{title} + \texttt{body\_text}.
+Chia stratified 70/15/15 (seed~$42$) như Bảng~\ref{tab:mmcovar-stats}.
+Trong $2{,}592$ URL, tải thành công $2{,}131$ (fail $461$).
+
+\begin{table}[htbp]
+\centering
+\caption{Thống kê subset MMCoVaR có ảnh tải được.}
+\label{tab:mmcovar-stats}
+\begin{tabular}{lrrr}
+\hline
+Split & $N$ & Credible & Misinfo \\
+\hline
+Train & 1491 & 1034 & 457 \\
+Val   & 320 & 222 & 98 \\
+Test  & 320 & 222 & 98 \\
+\hline
+All   & 2131 & 1478 & 653 \\
+\hline
+\end{tabular}
+\end{table}
+
+Thân bài tin tức thường rất dài --- điểm then chốt để hiểu vì sao text thống trị ở ablation sau này.
+
+\subsection{Encoder text: RoBERTa}
+
+Fine-tune RoBERTa-base~\cite{liu2019roberta}; vector CLS qua linear head; mất mát cross-entropy.
+
+\subsection{Encoder ảnh: CLIP}
+
+CLIP ViT-B/32~\cite{radford2021clip} với backbone đóng băng; ảnh lỗi/truncated $\rightarrow$ embedding zero (nhiễu nhưng giữ được training).
+
+\subsection{Late fusion}
+
+\begin{equation}
+h = [h_t; h_v], \qquad \hat{y}=\mathrm{MLP}(h).
+\end{equation}
+Nếu $h_v$ ít thông tin, MLP có thể học bỏ qua khối ảnh $\Rightarrow$ fusion $\approx$ text.
+
+\subsection{Baseline cổ điển}
+
+TF--IDF (1--2 gram, tối đa $50{,}000$ đặc trưng) + hồi quy logistic cân bằng lớp trên cùng split --- tham chiếu không dùng mạng nơ-ron sâu.
+
+\subsection{Huấn luyện và metric}
+
+AdamW, early stopping theo macro-F1 validation, seed cố định khi áp dụng.
+Macro-F1 được ưu tiên vì công bằng hơn accuracy khi lệch lớp (MMCoVaR credible nhiều hơn).
+
+\subsection{BERTopic}
+
+Gộp $5{,}752$ văn bản misinfo; truncate thân bài dài; embed \texttt{all-MiniLM-L6-v2}; \texttt{min\_topic\_size}$=15$; đặt tên chủ đề thủ công từ từ khóa.
+
+\section{Nhận xét mô hình (phần ``lý thuyết'' thực nghiệm)}
+\label{sec:theoretical-results}
+
+Luận văn chủ yếu thực nghiệm; không chứng minh bound học mới.
+Ba quan sát định hướng diễn giải:
+(1)~modality yếu/nhiễu khiến late fusion suy về text;
+(2)~nhãn publisher là surrogate của truth claim-level --- ảnh có thể correl mạnh với layout hơn với sự thật;
+(3)~BERTopic là tóm tắt không giám sát, cần đọc mẫu thủ công, không phải giải thích nhân quả.
+
+% ===================== CHUONG 4 =====================
+\chapter{Thực nghiệm}
+\label{chap:experiments}
+
+\section{Thiết lập thực nghiệm}
+\label{sec:setup}
+
+\subsection{Phần mềm}
+
+Python + PyTorch + Hugging Face Transformers, CLIP, BERTopic, scikit-learn.
+Có GPU/MPS khi sẵn có.
+
+\subsection{Thí nghiệm A: CONSTRAINT}
+
+RoBERTa + baseline TF--IDF+LR; đánh giá trên test.
+
+\subsection{Thí nghiệm B: Ablation MMCoVaR}
+
+Ba mô hình cùng split: text-only, image-only, late fusion.
+
+\subsection{Thí nghiệm C: BERTopic}
+
+Taxonomy trên corpus misinfo gộp.
+
+\subsection{Thí nghiệm D: Phân tích lỗi}
+
+Toàn bộ lỗi RoBERTa trên CONSTRAINT test; gán nhóm heuristic.
+
+\section{Kết quả}
+\label{sec:results}
+
+\subsection{CONSTRAINT: cổ điển so với Transformer}
+
+\begin{table}[htbp]
+\centering
+\caption{Kết quả test CONSTRAINT.}
+\label{tab:constraint-results}
+\begin{tabular}{lcccc}
+\hline
+Mô hình & Accuracy & Precision & Recall & Macro-F1 \\
+\hline
+TF--IDF + LogReg & 0.9224 & 0.9222 & 0.9230 & 0.9224 \\
+RoBERTa-base & 0.9720 & 0.9717 & 0.9723 & 0.9719 \\
+\hline
+\end{tabular}
+\end{table}
+
+RoBERTa hơn baseline khoảng năm điểm F1 --- biểu diễn ngữ cảnh Transformer có ý nghĩa rõ trên benchmark này.
+
+\subsection{Phân tích lỗi RoBERTa (CONSTRAINT test)}
+
+Trong $2{,}140$ mẫu test có $60$ lỗi ($38$ FP, $22$ FN), accuracy quan sát $0.9720$.
+
+\begin{table}[htbp]
+\centering
+\caption{Nhóm lỗi heuristic ($N=60$).}
+\label{tab:error-cats}
+\begin{tabular}{lr}
+\hline
+Nhóm & Số lượng \\
+\hline
+Misinfo bóng gió / dè dặt bị bỏ sót (FN) & 20 \\
+Báo động kiểu văn phong (FP) & 16 \\
+Văn bản ngắn / mơ hồ & 16 \\
+Credible nhưng dè dặt (FP) & 3 \\
+Alarmist nhưng credible (FP) & 3 \\
+Credible mang màu chính trị (FP) & 1 \\
+``Thuốc thần'' bị bỏ sót (FN) & 1 \\
+\hline
+\end{tabular}
+\end{table}
+
+Lỗi còn lại thường nằm ở biên: câu ngắn, giọng báo chí giật gân nhưng nhãn credible, hoặc misinfo ``giống tin thật''.
+
+\subsection{Ablation MMCoVaR}
+
+\begin{table}[htbp]
+\centering
+\caption{Ablation test MMCoVaR.}
+\label{tab:ablation}
+\begin{tabular}{lcccc}
+\hline
+Modality & Accuracy & Precision & Recall & Macro-F1 \\
+\hline
+Chỉ text & 0.9688 & 0.9658 & 0.9604 & 0.9630 \\
+Chỉ ảnh & 0.5969 & 0.5550 & 0.5613 & 0.5542 \\
+Late fusion & 0.9688 & 0.9632 & 0.9632 & 0.9632 \\
+\hline
+\end{tabular}
+\end{table}
+
+Trả lời RQ1: fusion không rõ hơn text.
+Trả lời RQ2: text $\gg$ ảnh.
+TF--IDF trên MMCoVaR text đạt macro-F1~$0.9180$ (vẫn dưới RoBERTa~$0.963$).
+
+\subsection{Taxonomy BERTopic}
+
+\begin{table}[htbp]
+\centering
+\caption{Top chủ đề misinfo / hesitancy.}
+\label{tab:taxonomy}
+\small
+\begin{tabular}{clrp{4.8cm}}
+\hline
+\# & Chủ đề & Size & Ý nghĩa \\
+\hline
+1 & Số ca/tử vong giật gân & 520 & Phóng đại mức độ nghiêm trọng \\
+2 & Chính trị hóa đại dịch & 500 & Đổ lỗi đảng phái \\
+3 & Biện pháp (khẩu trang\ldots) & 214 & Tranh cãi NPI + tin đồn \\
+4 & China / lab-origin & 188 & Âm mưu nguồn gốc \\
+5 & Thuốc thần / HCQ\ldots & 116 & ``Chữa khỏi'' chưa kiểm chứng \\
+6 & Bill Gates / elite & 112 & Âm mưu kiểm soát \\
+7 & Hình ảnh quá tải BV & 97 & Visual gây sợ \\
+8 & Trường / trẻ em & 82 & Lo lắng phụ huynh \\
+9 & Bài thuốc dân gian & 79 & Muối/hơi nước/tỏi\ldots \\
+10 & Tin đồn cấm đi lại & 76 & Chính sách giả \\
+\hline
+\end{tabular}
+\end{table}
+
+Khoảng $2{,}000$ tài liệu nằm outlier --- bình thường với post ngắn.
+RQ3: hesitancy là hệ sinh thái narrative (thiếu tin tưởng, thuốc thay thế, sợ hãi, chính trị), không chỉ ``tác dụng phụ mũi tiêm''.
+
+\section{Thảo luận}
+\label{sec:discussion}
+
+Trên tin tức MMCoVaR, text mang hầu hết tín hiệu độ tin cậy; ảnh minh họa yếu; fusion phục hồi gần như text.
+Nguyên nhân khả dĩ: thân bài dài, nhãn publisher thô, CLIP đóng băng, $\approx 18\%$ ảnh lỗi.
+Kết quả không phủ nhận multimodal nói chung --- cảnh báo không mặc định ``thêm CLIP là tốt hơn'' khi text đã rất mạnh.
+
+Detection + BERTopic tạo vòng giám sát: gắn cờ nội dung, rồi tóm tắt \emph{đang nói về gì} cho truyền thông y tế.
+
+% ===================== CHUONG 5 =====================
+\chapter{Kết luận}
+\label{chap:conclusion}
+
+\section{Tóm tắt}
+\label{sec:summary}
+
+Luận văn giải quyết phát hiện misinformation COVID/vaccine ở mức nội dung và phân tích narrative do dự tiêm hậu đại dịch.
+RoBERTa trên CONSTRAINT đạt macro-F1~$0.9719$, vượt rõ TF--IDF+LR.
+Ablation MMCoVaR cho thấy text thống trị, ảnh yếu, late fusion $\approx$ text.
+BERTopic tạo taxonomy đa chủ đề liên quan hesitancy.
+Mã nguồn kèm theo giúp tái lập thí nghiệm.
+
+\section{Hạn chế}
+\label{sec:limitations}
+
+Chưa crawl X/TikTok live; chưa Whisper; dữ liệu chủ yếu tiếng Anh; $\approx 18\%$ ảnh MMCoVaR fail; nhãn publisher $\neq$ fact-check từng câu; BERTopic phụ thuộc tham số và cần kiểm chứng thủ công.
+Về đạo đức, bộ phát hiện hỗ trợ quyết định chứ không thay người kiểm chứng; cần tránh chặn quá đà tranh luận hợp pháp hoặc satire.
+
+\section{Hướng phát triển}
+\label{sec:future-work}
+
+(1)~TikTok + Whisper cho multimodal video ngắn;
+(2)~cross-attention / mở đóng băng tháp ảnh;
+(3)~nhãn claim-level;
+(4)~bộ đánh giá đa ngôn ngữ gồm tiếng Việt;
+(5)~dashboard nối điểm classifier với xu hướng narrative thời gian thực.
+
+\clearpage
+\addcontentsline{toc}{chapter}{Tài liệu tham khảo}
+\printbibliography[title=Tài liệu tham khảo]
+
+\appendix
+\chapter{Phụ lục: ba số cần nhớ khi bảo vệ}
+\begin{itemize}
+  \item CONSTRAINT RoBERTa: macro-F1 \textbf{0.9719}
+  \item MMCoVaR: text/fusion $\approx$ \textbf{0.963}; ảnh $\approx$ \textbf{0.55}
+  \item Một câu then chốt: \emph{Trên tin tức MMCoVaR, text thống trị; fusion không thắng text.}
+\end{itemize}
+
+\end{document}

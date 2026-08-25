@@ -1,0 +1,138 @@
+% Master Thesis — Do Thanh Dat (M23.ICT.002)
+% University of Science and Technology of Hanoi (USTH)
+% Compile: pdflatex main && biber main && pdflatex main && pdflatex main
+%   or: latexmk -pdf -interaction=nonstopmode main.tex
+
+\documentclass[12pt,a4paper,oneside]{report}
+
+% ---------- Packages ----------
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=numeric,sorting=nyt,maxbibnames=99]{biblatex}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,calc}
+\usepackage{listings}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\addbibresource{refs.bib}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  citecolor=blue!50!black,
+  urlcolor=blue!60!black
+}
+
+\onehalfspacing
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{1.2em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textit{Decoding Post-Pandemic Vaccine Hesitancy}}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{30pt}
+
+% ---------- Metadata ----------
+\newcommand{\thesistitle}{Decoding the Post-Pandemic Vaccine Hesitancy:\\
+A Multimodal Transformer Approach to Misinformation Dynamics\\
+on Social Media}
+\newcommand{\studentname}{Do Thanh Dat}
+\newcommand{\studentid}{M23.ICT.002}
+\newcommand{\supervisor}{Giang Anh Tuan}
+\newcommand{\program}{Master in Information and Communication Technology}
+\newcommand{\university}{University of Science and Technology of Hanoi (USTH)}
+\newcommand{\academicyear}{2025--2026}
+
+\begin{document}
+
+% ===================== FRONT MATTER =====================
+\begin{titlepage}
+\centering
+\vspace*{0.8cm}
+{\large \university\par}
+\vspace{0.3cm}
+{\large \program\par}
+\vspace{0.5cm}
+\includegraphics[width=0.28\textwidth]{USTH-logo.png}\par
+\vspace{1.2cm}
+{\LARGE\bfseries \thesistitle\par}
+\vspace{1.4cm}
+{\large Master Thesis\par}
+\vspace{1.2cm}
+\begin{tabular}{rl}
+Student: & \studentname\ (\studentid)\\[0.3em]
+Supervisor: & \supervisor\\[0.3em]
+Academic year: & \academicyear\\
+\end{tabular}
+\vfill
+{\large Hanoi, August 2026\par}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+Vaccine hesitancy in the post-COVID-19 era continues to be amplified by misinformation circulating on social media.
+Modern posts and news articles often combine text with visual content, which challenges unimodal detectors that rely on language alone.
+This thesis develops a \emph{content-level} multimodal Transformer pipeline for detecting COVID-19 / vaccine-related misinformation and for analyzing the narratives that characterize post-pandemic hesitancy discourse.
+
+We conduct two complementary experimental tracks.
+First, on the CONSTRAINT COVID-19 Fake News benchmark (Patwa et~al.), a RoBERTa text classifier achieves strong test performance (\textbf{macro-F1 $= 0.9719$}, accuracy $= 0.9720$).
+Second, on the MMCoVaR vaccine-focused news repository, we evaluate text-only, image-only (CLIP), and late-fusion multimodal models.
+Ablation results show that text dominates (\textbf{macro-F1 $\approx 0.963$}), image-only performance is weak (\textbf{macro-F1 $\approx 0.554$}), and late fusion performs on par with text without clear gains.
+Finally, BERTopic applied to 5{,}752 misinformation documents yields a qualitative taxonomy of dominant narratives, including sensational case/death counts, politicized framing, contested public-health measures, origin conspiracies, miracle-cure claims, and elite/vaccine distrust themes.
+
+The contributions are a reproducible multimodal research pipeline, empirical evidence on modality contribution for vaccine misinformation detection, and a narrative taxonomy to support public-health communication analysis.
+Limitations regarding TikTok audio, large-scale platform APIs, and cross-attention fusion are discussed as future work.
+
+\vspace{1em}
+\noindent\textbf{Keywords:} vaccine hesitancy, misinformation detection, multimodal learning, Transformers, RoBERTa, CLIP, late fusion, BERTopic, social media.
+
+\chapter*{Acknowledgements}
+\addcontentsline{toc}{chapter}{Acknowledgements}
+I would like to thank my supervisor, \supervisor, for guidance throughout this internship and thesis.
+I also thank USTH and the ICT Master's program for academic support.
+Any remaining errors are my own.
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\clearpage
+\pagenumbering{arabic}
+
+% ===================== CHAPTERS =====================
+\input{chapters/01_introduction}
+\input{chapters/02_related_work}
+\input{chapters/03_methodology}
+\input{chapters/04_experiments}
+\input{chapters/05_narratives}
+\input{chapters/06_discussion}
+\input{chapters/07_conclusion}
+
+% ===================== BIBLIOGRAPHY =====================
+\printbibliography[heading=bibintoc,title=References]
+
+\appendix
+\input{chapters/A_appendix}
+
+\end{document}

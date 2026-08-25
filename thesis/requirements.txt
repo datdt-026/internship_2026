@@ -1,0 +1,33 @@
+# Core
+numpy>=1.24
+pandas>=2.0
+scikit-learn>=1.3
+pyyaml>=6.0
+tqdm>=4.66
+Pillow>=10.0
+
+# Deep learning
+torch>=2.1
+transformers>=4.38
+accelerate>=0.27
+datasets>=2.16
+sentencepiece>=0.1.99
+protobuf>=4.25
+
+# Multimodal (CLIP via transformers; open_clip optional later)
+# open-clip-torch>=2.24
+
+# Topic modeling (Step 5)
+bertopic>=0.16
+umap-learn>=0.5
+hdbscan>=0.8
+sentence-transformers>=2.6
+
+# Experiment tracking / utils
+matplotlib>=3.8
+seaborn>=0.13
+rich>=13.7
+
+# Dev
+jupyter>=1.0
+ipywidgets>=8.1

@@ -1,0 +1,27 @@
+\chapter{Conclusion and Future Work}
+\label{ch:conc}
+
+\section{Conclusion}
+
+This thesis presented a multimodal Transformer-oriented pipeline for analyzing post-pandemic vaccine-related misinformation dynamics.
+On CONSTRAINT, a RoBERTa text classifier achieved macro-F1 $0.9719$.
+On MMCoVaR, ablation showed that text is the dominant modality (macro-F1 $\approx 0.963$), image-only performance is weak, and late fusion approximately matches text without clear gains.
+BERTopic analysis of 5{,}752 misinformation documents produced a multi-narrative taxonomy spanning sensational statistics, politicization, contested measures, origin conspiracies, miracle cures, and elite distrust---themes relevant to vaccine hesitancy communication.
+
+Collectively, the work delivers a reproducible experimental stack and evidence-based answers to the research questions, while honestly scoping platform and modality limitations.
+
+\section{Future work}
+
+\begin{enumerate}
+  \item Integrate TikTok video frames and Whisper audio transcripts for true short-video multimodality.
+  \item Explore cross-attention / bottleneck fusion and unfrozen vision towers.
+  \item Expand claim-level fact-checked labels beyond publisher reliability.
+  \item Build a multilingual (including Vietnamese) evaluation set for USTH/local relevance.
+  \item Deploy an interactive dashboard linking classifier scores to live narrative trends for public-health partners.
+\end{enumerate}
+
+\section{Final remarks}
+
+Multimodality remains a promising direction for social misinformation research, but gains are dataset-dependent.
+For text-heavy news, investing first in strong language models and narrative analytics may yield more actionable insight than complex fusion alone.
+The pipeline and findings in this thesis provide a foundation for that continued work.

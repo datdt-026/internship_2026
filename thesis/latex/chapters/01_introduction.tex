@@ -1,0 +1,63 @@
+\chapter{Introduction}
+\label{ch:intro}
+
+\section{Background and motivation}
+
+The COVID-19 pandemic was accompanied by an ``infodemic'': a rapid surge of true, false, and misleading health information online~\cite{who2020infodemic}.
+Even after the acute pandemic phase, \emph{vaccine hesitancy}---delay in acceptance or refusal of vaccination despite availability~\cite{macdonald2015hesitancy}---remains a public-health challenge.
+Social platforms accelerate the spread of claims about vaccine safety, efficacy, mandates, and conspiratorial explanations, often faster than fact-checkers can respond.
+
+Contemporary social content is inherently \emph{multimodal}.
+A post may pair a neutral caption with a misleading image, or a long news article with an emotionally charged thumbnail.
+Unimodal text classifiers can miss visual cues; image-only models may ignore the linguistic claim that carries the misinformation.
+This thesis therefore studies a multimodal Transformer-based approach that jointly considers text and images for COVID-19 / vaccine misinformation detection, and complements detection with narrative analysis of dominant hesitancy-related themes.
+
+\section{Problem statement}
+
+We address content-level misinformation classification:
+given a textual claim (optionally paired with an image), predict whether the content is \emph{credible} or \emph{misinfo}.
+Unlike graph-propagation approaches that model user networks, we focus on the content itself---aligned with practical screening by trust-and-safety or public-health analysts.
+
+Formally, let $x = (t, v)$ where $t$ is text and $v$ is an optional image.
+We learn $f_\theta(x) \rightarrow y \in \{0,1\}$ with $0=\texttt{credible}$ and $1=\texttt{misinfo}$.
+We further analyze the subset predicted or labeled as misinformation to extract thematic clusters that characterize post-pandemic discourse.
+
+\section{Research questions}
+
+\begin{enumerate}[label=\textbf{RQ\arabic*.}]
+  \item Does multimodal late fusion (text + image) improve COVID/vaccine misinformation detection over strong text-only baselines on a multimodal news dataset?
+  \item In an ablation study, which modality contributes more to detection performance?
+  \item What dominant post-pandemic misinformation / hesitancy narratives emerge from topic modeling on misinformation content?
+\end{enumerate}
+
+\section{Scope and positioning}
+
+The original thesis proposal targeted X (Twitter) and TikTok with text, visual, and audio modalities (including Whisper).
+Given internship time constraints and platform API limitations, this work adopts a \emph{survival scope} that preserves the scientific core while remaining reproducible:
+
+\begin{itemize}
+  \item \textbf{Text benchmark track:} CONSTRAINT COVID-19 Fake News dataset~\cite{patwa2021fighting} for a strong RoBERTa baseline.
+  \item \textbf{Multimodal track:} MMCoVaR news articles~\cite{chen2021mmcovar} with downloaded images, comparing text-only, image-only (CLIP), and late fusion.
+  \item \textbf{Narrative track:} BERTopic~\cite{grootendorst2022bertopic} on misinformation documents.
+  \item \textbf{Deferred:} large-scale live crawling of X/TikTok, Whisper audio pipelines, and cross-attention fusion architectures (discussed as future work).
+\end{itemize}
+
+This positioning is honest: the proposal's cross-platform multimodal vision remains the long-term goal; the thesis delivers a complete, evaluated pipeline and clear evidence about modality contribution.
+
+\section{Contributions}
+
+\begin{enumerate}
+  \item A reproducible multimodal research codebase (data preparation, training, evaluation, topic analysis) for COVID/vaccine misinformation experiments.
+  \item Strong text-only results on CONSTRAINT (macro-F1 $0.9719$) establishing a competitive baseline.
+  \item An ablation study on MMCoVaR showing text dominance, weak image-only performance, and late fusion approximately matching text.
+  \item A qualitative taxonomy of post-pandemic misinformation narratives derived from BERTopic for communication-oriented interpretation.
+\end{enumerate}
+
+\section{Thesis structure}
+
+Chapter~\ref{ch:related} reviews related work.
+Chapter~\ref{ch:method} presents datasets, models, and training protocols.
+Chapter~\ref{ch:exp} reports experiments and ablations.
+Chapter~\ref{ch:narr} presents narrative analysis.
+Chapter~\ref{ch:disc} discusses implications, limitations, and ethics.
+Chapter~\ref{ch:conc} concludes and outlines future work.

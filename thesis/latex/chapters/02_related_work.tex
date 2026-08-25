@@ -1,0 +1,45 @@
+\chapter{Related Work}
+\label{ch:related}
+
+\section{Vaccine hesitancy and online misinformation}
+
+Vaccine hesitancy is recognized by WHO as a major barrier to immunization programs~\cite{macdonald2015hesitancy}.
+During COVID-19, false claims about vaccine ingredients, infertility, microchips, and exaggerated adverse events circulated widely.
+Shu et~al.~\cite{shu2017fake} survey fake-news detection on social media, distinguishing content-based, social-context, and hybrid approaches.
+This thesis follows the content-based line: classify the message itself before modeling diffusion graphs.
+
+Healthcare-specific resources such as CoAID~\cite{cui2020coaid} and ANTi-Vax~\cite{hayawi2022antivax} provide labeled COVID/vaccine claims.
+ANTi-Vax releases tweet IDs for labeled vaccine misinformation; however, ID-only releases require hydration under X API policies and are brittle when tweets are deleted.
+We therefore prioritize datasets that ship full text (and, when possible, images) for reproducibility within the internship timeline.
+
+\section{COVID-19 fake news benchmarks}
+
+Patwa et~al.~\cite{patwa2021fighting} released the CONSTRAINT shared-task dataset of English COVID-related social posts labeled \texttt{real}/\texttt{fake}.
+It has become a standard text classification benchmark with strong Transformer baselines.
+We use a public Hugging Face mirror of this dataset and map labels to our canonical schema (\texttt{credible}/\texttt{misinfo}).
+
+\section{Multimodal misinformation detection}
+
+Multimodal fake-news datasets such as Fakeddit~\cite{nakamura2020fakeddit} demonstrate that combining text and images can help when visual and linguistic signals interact.
+For COVID specifically, MM-COVID~\cite{li2020mmcovid} provides multilingual content with linked media, while MMCoVaR~\cite{chen2021mmcovar} focuses on COVID-19 \emph{vaccine} news and tweets with textual, visual, and temporal information.
+We adopt MMCoVaR \emph{news} articles because they include image URLs and publisher-based reliability labels suitable for multimodal experiments without tweet hydration.
+
+Architecturally, late fusion concatenates modality embeddings before classification, whereas early/cross-attention fusion mixes tokens across modalities.
+Late fusion is simpler, more robust to missing modalities, and appropriate under time constraints; cross-attention remains future work.
+
+\section{Transformer encoders for text and vision}
+
+Transformers~\cite{vaswani2017attention} underpin modern NLP.
+BERT~\cite{devlin2019bert} and RoBERTa~\cite{liu2019roberta} provide contextual text representations widely used for classification.
+For images, CLIP~\cite{radford2021clip} learns aligned vision--language embeddings from large-scale contrastive pretraining; its vision tower yields transferable image features for downstream tasks, often with a frozen backbone.
+
+\section{Topic modeling for narrative analysis}
+
+Beyond accuracy metrics, public-health stakeholders need interpretable themes.
+BERTopic~\cite{grootendorst2022bertopic} clusters document embeddings (e.g., Sentence-BERT~\cite{reimers2019sentence}) and extracts class-based TF--IDF topic words.
+We use BERTopic to build a taxonomy of misinformation narratives after detection experiments.
+
+\section{Research gap}
+
+Prior work often studies either (i)~strong text benchmarks without multimodal ablation on vaccine-focused news, or (ii)~multimodal architectures without a clear narrative analysis layer.
+This thesis connects both: competitive text baselines, modality ablation on MMCoVaR, and BERTopic-based narrative taxonomy under a single reproducible pipeline.
