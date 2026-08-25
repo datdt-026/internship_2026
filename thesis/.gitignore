@@ -21,10 +21,16 @@ env/
 .vscode/
 *.swp
 
-# Secrets / local env
+# Secrets / local env — real tokens only in .env (never in .env.example)
 .env
+.env.local
+.env.*.local
 .env.*
 !.env.example
+*.pem
+*.key
+credentials.json
+secrets/
 
 # Large artifacts (keep directory via .gitkeep)
 data/raw/*
