@@ -1,6 +1,7 @@
 % ============================================================
-% BAN LATEX TIENG VIET — CHI DE DOC HIEU / LUYEN BAO VE
-% Ban nop chinh thuc: Template/ (tieng Anh)
+% BAN LATEX TIENG VIET — DatDT.M23.ICT.002
+% Chi de doc hieu / luyen bao ve.
+% Ban nop chinh thuc: M23.ICT.002.tex (tieng Anh) trong cung folder.
 % Compile (Overleaf): pdfLaTeX + biber
 % ============================================================
 
@@ -16,9 +17,21 @@
 \usepackage{setspace}
 \onehalfspacing
 
-\usepackage[utf8]{inputenc}
-\usepackage[T5]{fontenc}
-\usepackage[vietnamese]{babel}
+% Tectonic/XeTeX: dùng fontspec (không dùng T5/inputenc)
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setdefaultlanguage{vietnamese}
+\setotherlanguage{english}
+% Ưu tiên font hệ thống hỗ trợ tiếng Việt
+\IfFontExistsTF{Times New Roman}{%
+  \setmainfont{Times New Roman}
+}{%
+  \IfFontExistsTF{Noto Serif}{%
+    \setmainfont{Noto Serif}
+  }{%
+    \setmainfont{Liberation Serif}
+  }%
+}
 
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb}
@@ -26,7 +39,7 @@
 \usepackage{url}
 \usepackage{paralist}
 \usepackage{csquotes}
-\usepackage[backend=biber, style=numeric, sorting=none]{biblatex}
+\usepackage[backend=bibtex, style=numeric, sorting=none]{biblatex}
 \addbibresource{biblio.bib}
 
 \usepackage{fancyhdr}
@@ -43,11 +56,10 @@
 \newcommand{\internalSupervisor}{Giang Anh Tuan}
 \newcommand{\externalSupervisor}{}
 \newcommand{\externalSupervisorAffiliation}{}
-\newcommand{\reporttitle}{Giải mã do dự tiêm vaccine hậu đại dịch:\\
-Tiếp cận Transformer đa phương thức đối với động lực\\
-thông tin sai lệch trên mạng xã hội}
-\newcommand{\reporttitleEN}{Decoding the Post-Pandemic Vaccine Hesitancy: A Multimodal Transformer Approach to Misinformation Dynamics on Social Media}
-\newcommand{\reportdate}{\today}
+\newcommand{\reporttitle}{Phát hiện đa phương thức và phân tích tường thuật\\
+thông tin sai lệch COVID-19 / vaccine bằng mô hình Transformer}
+\newcommand{\reporttitleEN}{Multimodal Detection and Narrative Analysis of COVID-19 and Vaccine Misinformation Using Transformer Models}
+\newcommand{\reportdate}{6 tháng 9 năm 2026}
 \newcommand{\academicyear}{2025--2026}
 
 \begin{document}
@@ -81,16 +93,12 @@ thông tin sai lệch trên mạng xã hội}
 \pagenumbering{roman}
 
 \begin{abstract}
-Sau COVID-19, do dự tiêm vaccine (\emph{vaccine hesitancy}) vẫn bị khuếch đại bởi thông tin sai lệch trên mạng xã hội và báo chí số.
-Nội dung hiện nay thường đa phương thức (văn bản + hình ảnh), nên bộ phân loại chỉ dựa vào text có thể thiếu tín hiệu thị giác.
-Luận văn này xây dựng pipeline Transformer ở mức nội dung để phát hiện misinformation liên quan COVID-19/vaccine, đồng thời phân tích các chủ đề tường thuật gắn với do dự tiêm hậu đại dịch.
-
-Trên bộ CONSTRAINT, RoBERTa đạt macro-F1~$0.9719$ (accuracy~$0.9720$), vượt baseline cổ điển TF--IDF + hồi quy logistic ($0.9224$).
-Trên MMCoVaR (tin tức có ảnh), ablation cho thấy text chiếm ưu thế (macro-F1~$\approx 0.963$), ảnh yếu ($\approx 0.554$), và late fusion gần như bằng text ($\approx 0.963$) --- ảnh gần như không mang lại lợi ích rõ.
-BERTopic trên $5{,}752$ văn bản misinfo tạo taxonomy chủ đề: số ca/tử vong giật gân, chính trị hóa, khẩu trang, nguồn gốc lab/China, thuốc ``thần'', Bill Gates, hình ảnh bệnh viện, trẻ em/trường học, bài thuốc dân gian, tin đồn cấm đi lại.
-
-Đóng góp gồm pipeline tái lập được, bằng chứng đóng góp từng modality, và bản đồ narrative hỗ trợ truyền thông y tế.
-TikTok, Whisper và crawl nền tảng trực tiếp được ghi nhận như hạn chế / hướng nghiên cứu tiếp theo.
+Luận văn nghiên cứu phát hiện misinformation COVID-19 / vaccine ở mức nội dung bằng Transformer, rồi map chủ đề tường thuật bằng BERTopic.
+Trên CONSTRAINT, RoBERTa đạt macro-F1~$0.9719$ (baseline TF--IDF~$0.9224$).
+Trên tin tức MMCoVaR, ablation \emph{chia lớp theo nhãn} (label-stratified) trông rất mạnh (text~$0.9630$, fusion~$0.9632$, ảnh~$0.5542$), nhưng audit cho thấy $99.4\%$ bài test cùng nhà xuất bản với tập train.
+Chúng tôi huấn luyện lại ba mô hình theo giao thức \emph{publisher-disjoint} (overlap~$0\%$): macro-F1 giảm còn text~$0.4398$, ảnh~$0.4887$, fusion~$0.5192$.
+Điểm then chốt khoa học: điểm cao dưới split cũ chủ yếu phản ánh rò rỉ phong cách nguồn, không phải phát hiện claim vững.
+Dữ liệu là tài nguyên tiếng Anh giai đoạn đại dịch (2020--2021); crawl TikTok/X sống và Whisper để dành hướng sau.
 \end{abstract}
 
 \clearpage
@@ -133,11 +141,11 @@ Các đóng góp chính gồm:
 \begin{enumerate}
   \item Pipeline nghiên cứu đa phương thức có thể tái lập (chuẩn bị dữ liệu, huấn luyện, đánh giá, phân tích chủ đề).
   \item Baseline text mạnh trên CONSTRAINT bằng RoBERTa (macro-F1~$0.9719$), kèm so sánh TF--IDF + hồi quy logistic.
-  \item Nghiên cứu ablation trên MMCoVaR: text / ảnh (CLIP) / late fusion, định lượng đóng góp từng modality.
-  \item Taxonomy chủ đề misinfo hậu đại dịch từ BERTopic, phục vụ diễn giải truyền thông.
+  \item Nghiên cứu MMCoVaR hai giao thức: (i)~ablation stratified (text~$0.9630$, ảnh~$0.5542$, fusion~$0.9632$) kèm rò rỉ publisher $99.4\%$; (ii)~huấn luyện lại publisher-disjoint (text~$0.4398$, ảnh~$0.4887$, fusion~$0.5192$, overlap~$0\%$).
+  \item Taxonomy BERTopic ($N=5{,}752$) --- hệ sinh thái misinfo COVID; một số chủ đề liên quan do dự tiêm chỉ \emph{gián tiếp}.
 \end{enumerate}
 
-So với đề xuất ban đầu nhắm X và TikTok kèm âm thanh (Whisper), thời gian thực tập và hạn chế API dẫn tới phạm vi thực tế (survival scope) vẫn giữ lõi khoa học: benchmark text, ablation đa phương thức, và phân tích narrative.
+So với đề xuất ban đầu nhắm X và TikTok kèm âm thanh (Whisper), thời gian thực tập và hạn chế API dẫn tới phạm vi thực tế (survival scope) vẫn giữ lõi khoa học: benchmark text, ablation đa phương thức (kèm audit/disjoint), và phân tích narrative.
 
 \section{Bố cục báo cáo}
 \label{sec:plan}
@@ -196,14 +204,14 @@ Luận văn dùng BERTopic để dựng taxonomy sau các thí nghiệm phát hi
 \label{sec:comparison}
 
 Nhiều công trình báo cáo độ chính xác cao trên benchmark text COVID, nhưng ít hơn về ablation tách biệt đóng góp text/ảnh trên cùng split vaccine multimodal.
-Nhãn độ tin cậy nhà xuất bản (MMCoVaR) thực dụng nhưng thô hơn fact-check từng claim; luận văn nêu rõ đánh đổi này.
+Nhãn độ tin cậy nhà xuất bản (MMCoVaR) thực dụng nhưng thô hơn fact-check từng claim; luận văn nêu rõ đánh đổi này và đo rò rỉ nguồn giữa train/test.
 Dataset chỉ có ID khó tái lập dưới API hiện tại; lựa chọn CONSTRAINT và MMCoVaR ưu tiên pipeline end-to-end.
 
-So với kiến trúc cross-attention phức tạp, luận văn đánh giá late fusion trong suốt với CLIP đóng băng để trả lời câu hỏi cụ thể: thêm ảnh có cải thiện RoBERTa mạnh trên subset tin tức này không?
-Kết quả thực nghiệm cho thấy gần như không --- kết quả ``âm'' nhưng hữu ích, tránh phóng đại lợi ích multimodal.
+So với kiến trúc cross-attention phức tạp, luận văn đánh giá late fusion trong suốt với CLIP đóng băng dưới \emph{hai} giao thức split.
+Dưới stratified (leak), fusion $\approx$ text $\approx 0.96$; dưới publisher-disjoint, điểm sụt mạnh và fusion chỉ nhỉnh hơn text --- cảnh báo không phóng đại lợi ích multimodal khi chưa kiểm soát leakage.
 
 Cuối cùng, chỉ phát hiện không đủ để giải thích cấu trúc diễn ngôn.
-Ghép classifier với BERTopic đáp ứng nhu cầu bản đồ chủ đề gắn hesitancy.
+Ghép classifier với BERTopic đáp ứng nhu cầu bản đồ chủ đề trong hệ sinh thái misinfo COVID.
 
 % ===================== CHUONG 3 =====================
 \chapter{Đóng góp phương pháp}
@@ -331,15 +339,22 @@ Có GPU/MPS khi sẵn có.
 
 RoBERTa + baseline TF--IDF+LR; đánh giá trên test.
 
-\subsection{Thí nghiệm B: Ablation MMCoVaR}
+\subsection{Thí nghiệm B: Ablation MMCoVaR (label-stratified)}
 
-Ba mô hình cùng split: text-only, image-only, late fusion.
+Ba mô hình trên split stratified gốc (seed~$42$): text-only, image-only, late fusion.
+Split này sau đó được chứng minh rò rỉ publisher mạnh (mục~\ref{sec:publisher-overlap}).
 
-\subsection{Thí nghiệm C: BERTopic}
+\subsection{Thí nghiệm C: Huấn luyện lại publisher-disjoint}
+
+Tái dựng split MMCoVaR sao cho \emph{không} nhà xuất bản nào xuất hiện ở hơn một trong train/val/test (seed~$42$, mục tiêu $\approx 70/15/15$).
+Audit: overlap publisher train$\cap$test $=0$; $0\%$ bài test có publisher đã thấy ở train.
+Huấn luyện lại ba mô hình (cùng siêu tham số); kích thước: train $1{,}499$ (12 publishers), val $325$ (8), test $307$ (42).
+
+\subsection{Thí nghiệm D: BERTopic}
 
 Taxonomy trên corpus misinfo gộp.
 
-\subsection{Thí nghiệm D: Phân tích lỗi}
+\subsection{Thí nghiệm E: Phân tích lỗi}
 
 Toàn bộ lỗi RoBERTa trên CONSTRAINT test; gán nhóm heuristic.
 
@@ -389,11 +404,11 @@ Credible mang màu chính trị (FP) & 1 \\
 
 Lỗi còn lại thường nằm ở biên: câu ngắn, giọng báo chí giật gân nhưng nhãn credible, hoặc misinfo ``giống tin thật''.
 
-\subsection{Ablation MMCoVaR}
+\subsection{Ablation MMCoVaR (label-stratified, leaky)}
 
 \begin{table}[htbp]
 \centering
-\caption{Ablation test MMCoVaR.}
+\caption{Ablation test MMCoVaR trên split \emph{label-stratified} (rò rỉ publisher).}
 \label{tab:ablation}
 \begin{tabular}{lcccc}
 \hline
@@ -406,9 +421,73 @@ Late fusion & 0.9688 & 0.9632 & 0.9632 & 0.9632 \\
 \end{tabular}
 \end{table}
 
-Trả lời RQ1: fusion không rõ hơn text.
-Trả lời RQ2: text $\gg$ ảnh.
-TF--IDF trên MMCoVaR text đạt macro-F1~$0.9180$ (vẫn dưới RoBERTa~$0.963$).
+Dưới giao thức này, text đã đạt macro-F1~$\approx 0.963$, ảnh yếu ($\approx 0.554$), late fusion gần bằng text ($0.9632$ vs $0.9630$).
+Nếu chỉ nhìn bảng này dễ kết luận ``bài toán gần xong'' --- mục tiếp theo cho thấy vì sao F1 tuyệt đối gây hiểu nhầm.
+
+\subsection{Audit chồng chéo publisher}
+\label{sec:publisher-overlap}
+
+Vì nhãn MMCoVaR là độ tin cậy nhà xuất bản (không phải fact-check từng claim), F1 text cao có thể phản ánh \emph{phong cách nguồn} bị lộ qua split.
+Bảng~\ref{tab:publisher-overlap} tóm tắt audit trên split stratified (artefact: \texttt{results/publisher\_overlap\_mmcovar.json}).
+
+\begin{table}[htbp]
+\centering
+\caption{Audit chồng chéo publisher trên split stratified MMCoVaR (seed~$42$).}
+\label{tab:publisher-overlap}
+\begin{tabular}{lr}
+\hline
+Chỉ số & Giá trị \\
+\hline
+Số publisher (train / val / test) & 57 / 41 / 39 \\
+Publisher thuộc train $\cap$ test & 37 \\
+Jaccard(train, test) & 0.627 \\
+Bài test có publisher đã xuất hiện ở train & 318 / 320 ($99.4\%$) \\
+\hline
+\end{tabular}
+\end{table}
+
+Split stratified \emph{không} publisher-disjoint: $99.4\%$ bài test đến từ publisher đã thấy khi train.
+Thứ hạng modality vẫn hữu ích (ba mô hình cùng leakage), nhưng không thể khẳng định mạnh về phát hiện claim-level.
+
+\subsection{Ablation publisher-disjoint (thí nghiệm mới)}
+\label{sec:pubdisjoint}
+
+Huấn luyện lại text / ảnh / fusion dưới split publisher-disjoint (overlap~$0\%$).
+Bảng~\ref{tab:ablation-pubdisjoint} báo cáo test; Bảng~\ref{tab:ablation-compare} so macro-F1 với giao thức leaky.
+
+\begin{table}[htbp]
+\centering
+\caption{Ablation test MMCoVaR trên split \emph{publisher-disjoint} (overlap~$0\%$).}
+\label{tab:ablation-pubdisjoint}
+\begin{tabular}{lcccc}
+\hline
+Modality & Accuracy & Precision & Recall & Macro-F1 \\
+\hline
+Chỉ text & 0.6775 & 0.5911 & 0.5106 & 0.4398 \\
+Chỉ ảnh & 0.6645 & 0.5584 & 0.5221 & 0.4887 \\
+Late fusion & 0.6938 & 0.6547 & 0.5491 & 0.5192 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Macro-F1: stratified (leaky) so với publisher-disjoint.}
+\label{tab:ablation-compare}
+\begin{tabular}{lcc}
+\hline
+Modality & Stratified (leaky) & Publisher-disjoint \\
+\hline
+Chỉ text & 0.9630 & 0.4398 \\
+Chỉ ảnh & 0.5542 & 0.4887 \\
+Late fusion & 0.9632 & 0.5192 \\
+\hline
+\end{tabular}
+\end{table}
+
+Bỏ chồng chéo publisher làm F1 text và fusion giảm khoảng một nửa.
+Fusion lúc này nhỉnh hơn text ($0.5192$ vs $0.4398$), còn ảnh không còn thua text thảm hại --- phù hợp với việc mô hình trước đó khai thác danh tính nguồn qua kênh text.
+Validation dưới giao thức disjoint lệch lớp (ít publisher misinfo ở val) nên early-stopping nhiễu hơn; tín hiệu khoa học chính vẫn là sụt giảm trên test.
 
 \subsection{Taxonomy BERTopic}
 
@@ -441,11 +520,28 @@ RQ3: hesitancy là hệ sinh thái narrative (thiếu tin tưởng, thuốc thay
 \section{Thảo luận}
 \label{sec:discussion}
 
-Trên tin tức MMCoVaR, text mang hầu hết tín hiệu độ tin cậy; ảnh minh họa yếu; fusion phục hồi gần như text.
-Nguyên nhân khả dĩ: thân bài dài, nhãn publisher thô, CLIP đóng băng, $\approx 18\%$ ảnh lỗi.
-Kết quả không phủ nhận multimodal nói chung --- cảnh báo không mặc định ``thêm CLIP là tốt hơn'' khi text đã rất mạnh.
+\subsection{Hai giao thức, hai câu chuyện cho RQ2}
 
-Detection + BERTopic tạo vòng giám sát: gắn cờ nội dung, rồi tóm tắt \emph{đang nói về gì} cho truyền thông y tế.
+Dưới split \emph{label-stratified} (leaky), text thống trị (macro-F1~$0.9630$), ảnh CLIP đóng băng yếu ($0.5542$), late fusion gần bằng text ($0.9632$).
+Dưới \emph{publisher-disjoint}, điểm tuyệt đối sụp: text~$0.4398$, ảnh~$0.4887$, fusion~$0.5192$.
+Fusion lúc này nhỉnh hơn text; ảnh không còn kém xa --- bằng chứng split leaky đã thưởng tín hiệu phong cách nguồn chủ yếu qua text.
+RQ2 vì vậy được trả lời bằng \emph{đối chiếu} hai giao thức, không chỉ một bảng F1.
+
+\subsection{Vì sao fusion ``vô dụng'' khi leak, rồi nhỉnh nhẹ khi disjoint}
+
+Trên split leaky: thân bài dài, thumbnail trang trí, nhãn publisher thô, CLIP đóng băng, $\approx 18\%$ URL ảnh lỗi.
+Khi loại danh tính publisher khỏi phân phối test, text không còn gần trần, và kênh ảnh có thể đóng góp tín hiệu bổ sung khiêm tốn (fusion~$0.5192$ vs text~$0.4398$).
+Kết quả vẫn không khẳng định late fusion ``giải'' claim-level --- chỉ cho thấy kết luận modality phụ thuộc giao thức đánh giá.
+
+\subsection{Narrative và hesitancy}
+
+Taxonomy mô tả \emph{hệ sinh thái misinfo COVID}; một số cụm (thiếu tin tưởng elite, thuốc thần, sợ trẻ/trường) có thể hỗ trợ do dự tiêm \emph{gián tiếp}; các cụm khác (khẩu trang, lab-origin, cấm đi lại) là diễn ngôn đại dịch rộng hơn.
+Vòng giám sát: classifier gắn cờ, BERTopic tóm tắt \emph{đang nói về gì}.
+
+\subsection{Đọc điểm cao dưới leakage}
+
+Tỷ lệ $99.4\%$ publisher-in-train trên test stratified nghĩa là F1 $\approx 0.96$ là cận trên dưới giao thức rò rỉ nguồn.
+Thí nghiệm publisher-disjoint định lượng caveat đó: macro-F1 gần như giảm một nửa khi bỏ overlap.
 
 % ===================== CHUONG 5 =====================
 \chapter{Kết luận}
@@ -454,37 +550,50 @@ Detection + BERTopic tạo vòng giám sát: gắn cờ nội dung, rồi tóm t
 \section{Tóm tắt}
 \label{sec:summary}
 
-Luận văn giải quyết phát hiện misinformation COVID/vaccine ở mức nội dung và phân tích narrative do dự tiêm hậu đại dịch.
-RoBERTa trên CONSTRAINT đạt macro-F1~$0.9719$, vượt rõ TF--IDF+LR.
-Ablation MMCoVaR cho thấy text thống trị, ảnh yếu, late fusion $\approx$ text.
-BERTopic tạo taxonomy đa chủ đề liên quan hesitancy.
-Mã nguồn kèm theo giúp tái lập thí nghiệm.
+Luận văn hỏi ba câu về phát hiện misinfo COVID/vaccine ở mức nội dung và phân tích narrative trên dữ liệu tiếng Anh giai đoạn đại dịch (CONSTRAINT + tin tức MMCoVaR --- không TikTok sống).
+RQ1: RoBERTa macro-F1~$0.9719$ vượt rõ TF--IDF~$0.9224$ trên CONSTRAINT.
+RQ2: dưới split stratified leaky, text~$\approx$fusion~$0.96$ và ảnh~$0.55$; dưới publisher-disjoint (overlap~$0\%$), điểm sụp còn text~$0.4398$, ảnh~$0.4887$, fusion~$0.5192$ --- cho thấy F1 cao trước đó chủ yếu do rò rỉ nguồn.
+RQ3: BERTopic trên $5{,}752$ văn bản misinfo tạo bản đồ diễn ngôn đa chủ đề; một số chủ đề liên quan hesitancy chỉ gián tiếp.
+Mã nguồn kèm theo giúp tái lập cả hai giao thức.
 
 \section{Hạn chế}
 \label{sec:limitations}
 
-Chưa crawl X/TikTok live; chưa Whisper; dữ liệu chủ yếu tiếng Anh; $\approx 18\%$ ảnh MMCoVaR fail; nhãn publisher $\neq$ fact-check từng câu; BERTopic phụ thuộc tham số và cần kiểm chứng thủ công.
-Về đạo đức, bộ phát hiện hỗ trợ quyết định chứ không thay người kiểm chứng; cần tránh chặn quá đà tranh luận hợp pháp hoặc satire.
+Hai hạn chế cần nêu trước:
+\begin{itemize}
+  \item \textbf{Rò rỉ publisher vs tổng quát hóa disjoint:}
+        MMCoVaR dùng độ tin cậy nhà xuất bản.
+        Trên stratified, $318/320$ ($99.4\%$) bài test cùng publisher với train và text/fusion đạt $\approx 0.96$; dưới publisher-disjoint cùng mô hình chỉ còn $\approx 0.44$--$0.52$ --- phát hiện claim-level vẫn chưa giải.
+        Validation disjoint cũng lệch lớp (ít publisher misinfo ở val).
+  \item \textbf{Phạm vi thời gian và nền tảng:}
+        Dữ liệu chủ yếu 2020--2021; không phải diễn ngôn live sau 2023; multimodal = tin tức MMCoVaR (không X/TikTok); chưa Whisper.
+\end{itemize}
+Thêm: seed cố định (chưa multi-seed); CLIP đóng băng; corpus BERTopic trộn CONSTRAINT; chủ đề phụ thuộc tham số; tiếng Anh-centric; $\approx 18\%$ URL ảnh fail.
+Về đạo đức, bộ phát hiện hỗ trợ quyết định chứ không thay người kiểm chứng.
 
 \section{Hướng phát triển}
 \label{sec:future-work}
 
-(1)~TikTok + Whisper cho multimodal video ngắn;
-(2)~cross-attention / mở đóng băng tháp ảnh;
-(3)~nhãn claim-level;
-(4)~bộ đánh giá đa ngôn ngữ gồm tiếng Việt;
-(5)~dashboard nối điểm classifier với xu hướng narrative thời gian thực.
+(1)~Chuyển sang nhãn \emph{claim-level} (hoặc adjudication thủ công) để split disjoint kiểm tra sự thật chứ không chỉ phong cách nguồn mới;
+(2)~TikTok + Whisper cho multimodal video ngắn;
+(3)~cross-attention / mở đóng băng tháp ảnh khi nhãn claim-level;
+(4)~đánh giá multi-seed và partition disjoint cân bằng hơn;
+(5)~bộ đánh giá đa ngôn ngữ gồm tiếng Việt;
+(6)~dashboard nối điểm classifier với xu hướng narrative.
+
+Finding lõi cần giữ: điểm multimodal cao dưới split rò rỉ publisher có thể mang tính ảo; cần audit leakage, báo cáo giao thức khó hơn, giữ baseline text mạnh, và ghép detection với phân tích narrative.
 
 \clearpage
 \addcontentsline{toc}{chapter}{Tài liệu tham khảo}
 \printbibliography[title=Tài liệu tham khảo]
 
 \appendix
-\chapter{Phụ lục: ba số cần nhớ khi bảo vệ}
+\chapter{Phụ lục: số cần nhớ khi bảo vệ}
 \begin{itemize}
   \item CONSTRAINT RoBERTa: macro-F1 \textbf{0.9719}
-  \item MMCoVaR: text/fusion $\approx$ \textbf{0.963}; ảnh $\approx$ \textbf{0.55}
-  \item Một câu then chốt: \emph{Trên tin tức MMCoVaR, text thống trị; fusion không thắng text.}
+  \item MMCoVaR stratified (leaky): text/fusion $\approx$ \textbf{0.963}; ảnh $\approx$ \textbf{0.55}; publisher overlap test \textbf{99.4\%}
+  \item MMCoVaR publisher-disjoint: text \textbf{0.4398}; ảnh \textbf{0.4887}; fusion \textbf{0.5192} (overlap \textbf{0\%})
+  \item Một câu then chốt: \emph{F1 $\approx 0.96$ dưới split leaky sụp còn $\approx 0.44$--$0.52$ khi tách publisher --- leakage mới là finding trung tâm.}
 \end{itemize}
 
 \end{document}

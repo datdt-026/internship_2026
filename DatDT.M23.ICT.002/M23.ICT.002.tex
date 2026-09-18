@@ -1,0 +1,959 @@
+% Master 2 Report LaTeX Template
+% ================================
+% 
+% CUSTOMIZATION INSTRUCTIONS:
+% 1. Replace the macro definitions with your actual information:
+%    - \studentname, \studentid, \studentemail
+%    - \internalSupervisor (always present, USTH)
+%    - \externalSupervisor, \externalSupervisorAffiliation (optional, leave empty if none)
+%    - \reporttitle, \academicyear
+% 
+% 2. Replace the sample bibliography entries in the filecontents environment
+%    with your actual papers from Google Scholar (export as BibTeX)
+% 
+% 3. Customize the document class options if needed (currently: 12pt, a4paper)
+% 
+% 4. Adjust geometry package margins if required
+% 
+% 5. Add your content to each section
+% 
+% COMPILATION:
+%   pdflatex -> biber -> pdflatex -> pdflatex
+%   (or use Overleaf/TeXstudio which handle this automatically)
+% ================================
+
+% Document class: report, 12pt font, A4 paper
+\documentclass[12pt, a4paper]{report}
+
+% Geometry package for A4 with margins
+\usepackage[a4paper, 
+            left=2.5cm, 
+            right=2.5cm, 
+            top=2.5cm, 
+            bottom=2.5cm,
+            bindingoffset=0cm]{geometry}
+
+% Line spacing: 1.5 times the baseline skip
+\usepackage{setspace}
+\onehalfspacing
+
+% English language support (UK/British English)
+\usepackage[UKenglish]{babel}
+
+% UTF-8 encoding
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Additional useful packages
+\usepackage{graphicx}       % For including images
+\usepackage{amsmath}        % For advanced math
+\usepackage{amssymb}        % For math symbols
+\usepackage{hyperref}       % For hyperlinks in PDF
+\usepackage{url}            % For proper URL formatting
+\usepackage{paralist}       % For better list environments
+\usepackage{csquotes}       % For proper quotation marks
+\usepackage[backend=bibtex, style=numeric, sorting=none]{biblatex}
+\addbibresource{biblio.bib} % Bibliography file
+\usepackage{lipsum} % bla bla bla
+
+% Header and footer styling
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\studentname\ -- \studentid}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ============================================
+% MACROS FOR STUDENT AND SUPERVISOR INFORMATION
+% ============================================
+
+% Student information
+\newcommand{\studentname}{Do Thanh Dat}
+\newcommand{\studentid}{M23.ICT.002}
+\newcommand{\studentemail}{datdt.m23ict@usth.edu.vn}
+
+% Supervisors:
+% - Internal supervisor (USTH, always present): just name
+% - External supervisor (optional): name + affiliation
+\newcommand{\internalSupervisor}{Giang Anh Tuan}
+% Use \empty so the title-page \ifx test hides the external-supervisor block
+\let\externalSupervisor\empty
+\newcommand{\externalSupervisorAffiliation}{}
+
+% Report information
+\newcommand{\reporttitle}{Multimodal Detection and Narrative Analysis of COVID-19 and Vaccine Misinformation Using Transformer Models}
+\newcommand{\reportdate}{27 August 2026}
+\newcommand{\academicyear}{2025-2026}
+
+% ============================================
+% TITLE PAGE
+% ============================================
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    
+    % USTH Logo - download from official USTH website and place in your working directory
+    % Recommended: use a high-quality PNG or PDF version
+    {\Large\bfseries University of Science and Technology of Hanoi\par}
+    {\large\bfseries Department of Information and Communication Technology\par}
+    \vspace{0.666cm}
+    \includegraphics[width=0.25\textwidth]{USTH-logo.png}\par
+    
+    \vspace{2cm}
+    
+    {\LARGE\bfseries MASTER THESIS\par}
+    
+    \vspace{1.5cm}
+    
+    {\huge\bfseries \reporttitle\par}
+    
+    \vspace{1.5cm}
+    
+    {\large {\bfseries Submitted by:} \studentname\par}
+    {\large {\bfseries Student ID:} \studentid\par}
+    {\large {\bfseries Email:} \studentemail\par}
+    
+    \vspace{2cm}
+    
+    
+    
+    \ifx\externalSupervisor\empty
+        % Only internal supervisor (USTH)
+    	{\large\vspace{2\baselineskip}}
+        {\large {\bfseries Internal Supervisor:} \internalSupervisor\par}
+    \else
+        % External + internal supervisors
+        {\large {\bfseries External Supervisor:} \externalSupervisor\par}
+        {\small \externalSupervisorAffiliation\par}
+        {\large {\bfseries Internal Supervisor:} \internalSupervisor\par}
+    \fi
+    
+    \vspace{1cm}
+    
+    {\large {\bfseries Academic Year:} \academicyear\par}
+    {\large {\bfseries Date:} \reportdate\par}
+    
+\end{titlepage}
+
+\pagenumbering{roman}
+
+% ============================================
+% ABSTRACT
+% ============================================
+
+\begin{abstract}
+This thesis studies content-level detection of COVID-19 / vaccine misinformation with Transformers, then maps themes in labelled false documents with BERTopic.
+On CONSTRAINT, RoBERTa reaches macro-F1~$0.9719$ (TF--IDF baseline~$0.9224$).
+On MMCoVaR news, a \emph{label-stratified} ablation looks very strong (text~$0.9630$, fusion~$0.9632$, image~$0.5542$), but an audit shows $99.4\%$ of test articles share a publisher with train.
+We therefore retrain the same three models under a \emph{publisher-disjoint} protocol (overlap~$0\%$): macro-F1 drops to text~$0.4398$, image~$0.4887$, fusion~$0.5192$.
+That collapse is the central scientific finding: high scores under the original split largely reflect source leakage, not robust claim-level detection.
+Data are English pandemic-period resources (2020--2021); live TikTok/X crawling and Whisper audio remain future work.
+\end{abstract}
+
+\clearpage
+
+% ============================================
+% ACKNOWLEDGMENTS
+% ============================================
+
+\chapter*{Acknowledgments}
+\addcontentsline{toc}{chapter}{Acknowledgments}
+
+I thank my supervisor, Giang Anh Tuan, for guidance during this internship and thesis.
+I also thank USTH and the ICT Master's programme for academic support.
+
+\clearpage
+
+% ============================================
+% TABLE OF CONTENTS
+% ============================================
+
+\tableofcontents
+
+\clearpage
+
+% ============================================
+% MAIN CONTENT
+% ============================================
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% ============================================
+% CHAPTER 1: INTRODUCTION
+% ============================================
+
+\chapter{Introduction}
+\label{chap:introduction}
+
+\section{Context and motivation}
+\label{sec:context}
+
+\subsection{COVID-19 and the infodemic}
+
+COVID-19 created a health crisis and, in parallel, an \emph{infodemic}: a large volume of true, false, and misleading information circulating quickly on online platforms~\cite{who2020infodemic}.
+Misinformation can affect public understanding, trust in health information, acceptance of public-health measures, and vaccine decision-making.
+
+\subsection{Vaccine hesitancy}
+
+Vaccine hesitancy denotes delay in acceptance or refusal of vaccination despite availability~\cite{macdonald2015hesitancy}.
+Misinformation is not the only cause of hesitancy, but it can contribute to distrust, uncertainty, and fear.
+Detecting misleading content is therefore one component of the broader public-health information problem---not a full model of individual behaviour.
+
+\subsection{Why online misinformation is multimodal}
+
+Online items often combine text and image.
+The two modalities may reinforce each other or conflict (for example a calm caption with emotionally framed imagery).
+Text-only models miss visual cues; image-only models miss the linguistic claim.
+Multimodal classification is therefore worth studying under controlled conditions.
+
+\subsection{Scope of this work}
+
+This internship thesis addresses \emph{content-level classification}:
+input text and, when available, an image; output \texttt{credible} or \texttt{misinfo}.
+Empirical evidence comes from English pandemic-period resources (mainly 2020--2021): CONSTRAINT social text~\cite{patwa2021fighting} and MMCoVaR vaccine news with images~\cite{chen2021mmcovar}.
+
+We do \emph{not} crawl live X/TikTok, model social-network diffusion, profile users, use Whisper audio, propose a new cross-attention SOTA architecture, or claim to predict psychological vaccine hesitancy.
+The task is content classification, not user-behaviour prediction or diffusion modelling.
+
+\section{Research questions}
+\label{sec:rqs}
+
+\begin{description}
+  \item[RQ1] Does a contextual Transformer (RoBERTa) provide a clear improvement over a classical TF--IDF + logistic regression baseline on the CONSTRAINT benchmark?
+  \item[RQ2] How do text, image, and multimodal fusion perform under a publisher-overlapping (label-stratified) split and under a publisher-disjoint split?
+  \item[RQ3] What major misinformation themes emerge from the aggregated misinformation corpus (BERTopic), framed as an ecosystem rather than as causes of hesitancy?
+\end{description}
+
+RQ2 is the central question: we do not only ask whether multimodality ``works'', but whether the \emph{evaluation protocol} changes the scientific conclusion.
+
+\section{Contributions}
+\label{sec:contribution}
+
+The contribution is empirical and methodological, not architectural novelty.
+
+\begin{enumerate}
+  \item A reproducible pipeline: cleaning, label normalisation, TF--IDF and RoBERTa, CLIP, late fusion, evaluation, error analysis, and BERTopic.
+  \item A clear Transformer vs classical comparison on CONSTRAINT (RoBERTa macro-F1~$0.9719$ vs TF--IDF+LR~$0.9224$).
+  \item A leakage-aware multimodal study on MMCoVaR (most important contribution): stratified ablation (text~$0.9630$, image~$0.5542$, fusion~$0.9632$) with $99.4\%$ publisher overlap on test, then publisher-disjoint retraining (text~$0.4398$, image~$0.4887$, fusion~$0.5192$, overlap~$0\%$).
+  \item A BERTopic taxonomy on $N=5{,}752$ misinformation documents, reading COVID misinformation as an ecosystem; vaccine hesitancy appears only partly / indirectly.
+\end{enumerate}
+
+\section{Scope and limitations (preview)}
+\label{sec:scope-preview}
+
+Scope: English offline benchmarks; content-level text (+ image); COVID-related labels.
+Key limitations previewed here and revisited in Chapter~\ref{chap:conclusion}: publisher reliability $\neq$ claim-level factuality; image download failures; frozen CLIP; simple late fusion; class imbalance under publisher-disjoint validation; no live social evaluation; no causal link to hesitancy behaviour.
+
+\section{Thesis structure}
+\label{sec:plan}
+
+Chapter~\ref{chap:related-works} reviews related work and states the research gap.
+Chapter~\ref{chap:contribution} describes methodology, datasets, models, and the two evaluation protocols.
+Chapter~\ref{chap:experiments} reports experiments, the leakage audit, publisher-disjoint findings, and discussion.
+Chapter~\ref{chap:conclusion} answers the RQs, lists limitations, and outlines future work.
+
+% ============================================
+% CHAPTER 2: RELATED WORKS
+% ============================================
+
+\chapter{Related Works}
+\label{chap:related-works}
+
+Before presenting methods, we place the thesis against prior work on hesitancy and misinformation, COVID benchmarks, multimodal detection, Transformers, topic modelling, and the risk that classifiers learn publisher style instead of claim truth.
+The review is deliberately pedagogical: what was established, which gaps remain, and why our experimental design follows from those gaps.
+
+\section{Literature Review}
+\label{sec:literature-review}
+
+\subsection{Vaccine hesitancy and online misinformation}
+
+WHO recognises vaccine hesitancy as a persistent obstacle to immunisation programmes~\cite{macdonald2015hesitancy}.
+Hesitancy is graded rather than binary: individuals may accept some vaccines, postpone others, or refuse particular products depending on trust, perceived risk, and peers.
+In the COVID-19 period, circulating falsehoods covered ingredients, infertility, microchips, and exaggerated adverse events.
+The WHO joint statement on the COVID-19 infodemic stresses that misleading information can damage health behaviours as severely as the pathogen in some contexts~\cite{who2020infodemic}.
+
+Social-science studies connect online exposure to vaccination attitudes.
+Loomba et~al.~\cite{loomba2021measuring} showed that COVID-19 vaccine misinformation lowered vaccination intent in the UK and USA.
+Pierri et~al.~\cite{pierri2022online} linked online misinformation to early hesitancy and refusal.
+Muric et~al.~\cite{muric2021covid} released a public Twitter corpus centred on anti-vaccine content and conspiracies.
+Such findings motivate computational monitoring of false content, yet they do not themselves supply a multimodal detector with controlled modality ablations.
+
+Shu et~al.~\cite{shu2017fake} survey fake-news detection on social media and separate content-based, social-context, and hybrid families.
+Zhou and Zafarani~\cite{zhou2020survey} organise theories, methods, and open problems more broadly.
+Content-based systems inspect linguistic style, claim structure, and attached media; social-context systems exploit user graphs, cascades, and long-term source credibility.
+This thesis follows the content-based line: classify the message itself before modelling diffusion.
+That choice fits internship constraints and yields models that can screen one post or article without a full interaction graph.
+
+Healthcare-oriented resources such as CoAID~\cite{cui2020coaid} and ANTi-Vax~\cite{hayawi2022antivax} supply labelled COVID/vaccine claims.
+ANTi-Vax distributes tweet IDs; hydration under current API policies is brittle when tweets disappear.
+We therefore prefer datasets that ship full text (and, when possible, images) so experiments remain auditable within the internship window.
+The trade-off is clear: some ecological validity of live social streams is sacrificed for a complete experimental stack.
+
+\subsection{COVID-19 fake news benchmarks}
+
+Patwa et~al.~\cite{patwa2021fighting} released the CONSTRAINT shared-task set of English COVID-related social posts labelled real/fake.
+It is now a standard text classification benchmark with strong Transformer baselines.
+We use a public Hugging Face mirror and map labels into a canonical credible/misinfo schema.
+
+Other COVID corpora broaden coverage but differ in modality and labelling protocol.
+CoAID~\cite{cui2020coaid} targets healthcare misinformation; MM-COVID~\cite{li2020mmcovid} is multilingual and multimodal; MMCoVaR~\cite{chen2021mmcovar} focuses on vaccine news/tweets with visual and temporal fields.
+No single dataset jointly maximises claim-level fact-checking, multimodal completeness, and easy reproducibility.
+Our design therefore uses CONSTRAINT as a strong text reference and MMCoVaR news for multimodal ablation.
+
+\subsection{Multimodal misinformation detection}
+
+Early multimodal rumour/fake-news systems fused text with images using RNNs and CNNs~\cite{jin2017multimodal}.
+Later deep models explored event-invariant features~\cite{wang2018eann}, variational multimodal autoencoders~\cite{khattar2019mvae}, and transfer-learning stacks such as SpotFake / SpotFake+~\cite{singhal2019spotfake,singhal2020spotfakeplus}.
+SAFE~\cite{zhou2020safe} emphasises cross-modal similarity; MCAN~\cite{wu2021mcan} uses co-attention; CAFE~\cite{chen2022cafe} models cross-modal ambiguity.
+Surveys synthesise this growth and stress that fusion strategy strongly affects outcomes~\cite{alam2022survey,tufchi2023survey}.
+
+Benchmark datasets also evolved.
+Fakeddit~\cite{nakamura2020fakeddit} provides fine-grained multimodal fake-news labels at scale.
+The Hateful Memes challenge~\cite{kiela2020hateful} shows that vision--language inconsistency can be decisive even outside classical ``news'' settings.
+For COVID specifically, MM-COVID~\cite{li2020mmcovid} and MMCoVaR~\cite{chen2021mmcovar} remain practical starting points.
+We adopt MMCoVaR \emph{news} articles because they include image URLs and publisher-based reliability labels suitable for multimodal runs without tweet hydration.
+
+Architecturally, late fusion concatenates modality embeddings before classification, whereas early or cross-attention fusion mixes tokens across modalities~\cite{kiela2019mmbt,wu2021mcan,chen2022cafe}.
+Recent CLIP-guided detectors~\cite{zhou2023fndclip} exploit vision--language pretraining to align text and images.
+Late fusion is simpler, more robust to missing modalities, and appropriate under time constraints; cross-attention and unfrozen CLIP adaptation remain future work.
+Critically, many prior papers report overall multimodal accuracy without a same-split ablation that isolates whether images add value beyond a strong text Transformer on \emph{long news bodies}.
+That gap motivates our MMCoVaR experiment.
+
+\subsection{Transformer encoders for text and vision}
+
+Transformers~\cite{vaswani2017attention} underpin modern representation learning.
+BERT~\cite{devlin2019bert} and RoBERTa~\cite{liu2019roberta} provide contextual text representations widely used for classification and remain strong baselines for COVID fake-news text tasks.
+Vision Transformers~\cite{dosovitskiy2021vit} and CLIP~\cite{radford2021clip} extend Transformer ideas to images and joint vision--language spaces.
+CLIP's vision tower yields transferable image features for downstream tasks, often with a frozen backbone for efficiency.
+In multimodal fake-news pipelines, frozen CLIP features are attractive but may underperform when images are decorative thumbnails rather than claim-bearing memes.
+
+\subsection{Topic modelling for narrative analysis}
+
+Beyond accuracy metrics, public-health stakeholders need interpretable themes.
+Classical LDA~\cite{blei2003lda} remains a reference probabilistic topic model.
+Neural approaches such as BERTopic~\cite{grootendorst2022bertopic} cluster document embeddings (for example Sentence-BERT~\cite{reimers2019sentence}) and extract class-based TF--IDF topic words.
+Comparative studies on social-media text discuss strengths and instability of BERTopic relative to LDA and related methods~\cite{egger2022topic}.
+We use BERTopic to build a qualitative taxonomy of misinformation themes after detection experiments, while acknowledging sensitivity to seeds and parameters.
+
+\subsection{Source bias, style cues, and evaluation pitfalls}
+
+A recurring risk in news classification is that models learn \emph{source style} rather than claim veracity.
+Stylometric analyses show systematic linguistic differences between fake/hyperpartisan and mainstream text~\cite{horne2017just,potthast2018stylometric}.
+Baly et~al.~\cite{baly2018predicting} study predicting factuality and bias of news \emph{media sources}, highlighting that publisher-level signals are powerful---and therefore dangerous if leaked across train/test splits.
+Schuster et~al.~\cite{schuster2020limitations} discuss limitations of stylometry-oriented detectors in related settings, reinforcing the need for careful evaluation claims.
+
+These works directly inform our MMCoVaR setup: labels are publisher reliability, and our stratified splits are not publisher-disjoint.
+High text accuracy under that protocol must therefore be interpreted with possible source-leakage in mind.
+Chapter~\ref{chap:experiments} reports both the stratified overlap audit and a publisher-disjoint retrain; claim-level fact-checks remain a stricter alternative for future work.
+
+\section{Comparison with Existing Approaches}
+\label{sec:comparison}
+
+Table~\ref{tab:related-compare} positions this thesis against common lines of work.
+Table~\ref{tab:gap-checklist} emphasises the evaluation gap: many studies use text and/or fusion, but fewer report an explicit publisher-overlap audit and a publisher-disjoint retrain.
+
+\begin{table}[htbp]
+\centering
+\caption{Positioning relative to related lines of work.}
+\label{tab:related-compare}
+\small
+\begin{tabular}{p{3.2cm}p{5.2cm}p{4.2cm}}
+\hline
+Line of work & Typical focus & This thesis \\
+\hline
+Social-context detectors & Graphs, users, cascades~\cite{shu2017fake} & Content-only screening \\
+SOTA multimodal fusion & Cross-attention / CLIP alignment~\cite{wu2021mcan,zhou2023fndclip} & Transparent late fusion + ablation \\
+COVID text benchmarks & High accuracy on CONSTRAINT-like data~\cite{patwa2021fighting} & Same + classical TF--IDF baseline \\
+Vaccine Twitter ID sets & Hydration-dependent labels~\cite{hayawi2022antivax,muric2021covid} & Full-text/image reproducible stack \\
+Topic analyses & Themes without detectors~\cite{grootendorst2022bertopic} & Detector + BERTopic taxonomy \\
+Source factuality & Publisher prediction~\cite{baly2018predicting} & Explicit leakage audit on splits \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Evaluation-gap checklist (simplified).}
+\label{tab:gap-checklist}
+\small
+\begin{tabular}{lccccc}
+\hline
+Focus & Text & Image & Fusion & Leakage audit & Publisher-disjoint \\
+\hline
+Typical text benchmarks & yes & -- & -- & rare & rare \\
+Typical multimodal detectors & yes & yes & yes & rare & rare \\
+\textbf{This work} & yes & yes & yes & \textbf{yes} & \textbf{yes} \\
+\hline
+\end{tabular}
+\end{table}
+
+Many papers emphasise architecture and report high benchmark F1.
+Fewer isolate modality contribution on the same vaccine news split \emph{and} quantify publisher overlap.
+MMCoVaR publisher-reliability labels are practical but coarser than claim-level fact-checks; that trade-off is central to our design.
+Architectural novelty is \emph{not} the primary goal; the study emphasises reproducibility, controlled modality comparison, and leakage-aware evaluation.
+Chapter~\ref{chap:contribution} turns this gap into two concrete protocols; Chapter~\ref{chap:experiments} shows how protocol choice changes the conclusion for RQ2.
+
+% ============================================
+% CHAPTER 3: CONTRIBUTION
+% ============================================
+
+\chapter{Contributions}
+\label{chap:contribution}
+
+This chapter specifies the implemented methods: data preparation, modality encoders, fusion, training protocol, metrics, and narrative analysis.
+Literature context is assumed from Chapter~\ref{chap:related-works}.
+
+\section{Methodology}
+\label{sec:methodology}
+
+\subsection{End-to-end pipeline}
+
+The research stack has five stages:
+(1)~dataset preparation and label normalisation;
+(2)~modality-specific encoders;
+(3)~classification heads for text, image, and late fusion;
+(4)~evaluation with accuracy, precision, recall, and macro-F1;
+(5)~BERTopic narrative analysis on misinformation texts.
+
+Formally, let $x = (t, v)$ where $t$ is text and $v$ is an optional image.
+We learn $f_\theta(x) \rightarrow y \in \{0,1\}$ with $0=\texttt{credible}$ and $1=\texttt{misinfo}$.
+
+\subsection{Canonical label mapping}
+
+All experiments use a binary schema:
+\texttt{credible} maps to class~$0$ and \texttt{misinfo} maps to class~$1$.
+CONSTRAINT labels \texttt{real}/\texttt{fake} map to \texttt{credible}/\texttt{misinfo}.
+MMCoVaR \texttt{reliability}$=1$ (reliable) maps to \texttt{credible}; \texttt{reliability}$=0$ maps to \texttt{misinfo}.
+
+\textbf{Important:} on MMCoVaR, the label reflects \emph{publisher reliability}, not a direct fact-check of every claim.
+That surrogate is the main reason publisher leakage must be audited in Chapter~\ref{chap:experiments}.
+
+\subsection{CONSTRAINT text track}
+
+We use the public Hugging Face distribution of the CONSTRAINT English dataset~\cite{patwa2021fighting}.
+After cleaning (URL stripping, whitespace normalisation) we obtain $10{,}700$ samples with official splits (Table~\ref{tab:constraint-stats}).
+
+\begin{table}[htbp]
+\centering
+\caption{CONSTRAINT dataset statistics after preprocessing.}
+\label{tab:constraint-stats}
+\begin{tabular}{lrrrr}
+\hline
+Split & $N$ & Credible & Misinfo & Avg.\ text length \\
+\hline
+Train & 6420 & 3360 & 3060 & 165.1 \\
+Val   & 2140 & 1120 & 1020 & 162.8 \\
+Test  & 2140 & 1120 & 1020 & 168.1 \\
+\hline
+All   & 10700 & 5600 & 5100 & 165.2 \\
+\hline
+\end{tabular}
+\end{table}
+
+CONSTRAINT samples are text-only social posts; no images are available for this track.
+It serves as a strong unimodal reference and validates the training/evaluation stack.
+
+\subsection{MMCoVaR multimodal track}
+
+MMCoVaR provides vaccine-focused news with image URLs~\cite{chen2021mmcovar}.
+We download images from the \texttt{image} column and retain articles with a successfully retrieved local image.
+Text is formed by concatenating \texttt{title} and \texttt{body\_text}.
+Stratified splits (70/15/15, seed~$42$) yield the statistics in Table~\ref{tab:mmcovar-stats}.
+Of $2{,}592$ candidate URLs, $2{,}131$ images were successfully downloaded ($461$ failures due to dead links or timeouts).
+
+\begin{table}[htbp]
+\centering
+\caption{MMCoVaR multimodal subset statistics (articles with downloaded images).}
+\label{tab:mmcovar-stats}
+\begin{tabular}{lrrr}
+\hline
+Split & $N$ & Credible & Misinfo \\
+\hline
+Train & 1491 & 1034 & 457 \\
+Val   & 320 & 222 & 98 \\
+Test  & 320 & 222 & 98 \\
+\hline
+All   & 2131 & 1478 & 653 \\
+\hline
+\end{tabular}
+\end{table}
+
+News bodies are long (often thousands of characters).
+This text richness is central to interpreting later ablation results: linguistic content can already encode publisher-style reliability cues.
+
+\paragraph{Publisher-disjoint split (Protocol B).}
+Separately, we rebuild partitions so that \emph{no publisher appears in more than one of train/val/test} (seed~$42$, target $\approx 70/15/15$ by article count).
+Table~\ref{tab:mmcovar-pubdisjoint-stats} summarises sizes; train$\cap$test publishers $=0$.
+Chapter~\ref{chap:contribution} only describes construction; Chapter~\ref{chap:experiments} reports performance under this harder protocol.
+
+\begin{table}[htbp]
+\centering
+\caption{MMCoVaR publisher-disjoint split sizes (articles with downloaded images).}
+\label{tab:mmcovar-pubdisjoint-stats}
+\begin{tabular}{lrrr}
+\hline
+Split & $N$ & Publishers & Notes \\
+\hline
+Train & 1499 & 12 & No shared publishers with val/test \\
+Val   & 325 & 8 & More class-imbalanced than stratified val \\
+Test  & 307 & 42 & Unseen publishers relative to train \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{RoBERTa text encoder}
+
+We fine-tune RoBERTa-base~\cite{liu2019roberta} for binary classification.
+Input text is tokenised with truncation/padding to a fixed maximum length.
+The pooled representation (CLS) is passed to a linear classification head.
+The training loss is standard cross-entropy:
+\begin{equation}
+\mathcal{L} = -\sum_{c=0}^{1} \mathbb{1}[y=c]\log p_\theta(c\mid t).
+\end{equation}
+
+\subsection{CLIP image encoder}
+
+For images we use CLIP ViT-B/32~\cite{radford2021clip} with a frozen vision backbone.
+An image $v$ is resized and normalised according to CLIP preprocessing, then encoded to a fixed-dimensional embedding $h_v$.
+A linear head maps $h_v$ to class logits for the image-only model.
+Frozen features reduce trainable parameters and training time; they also test whether off-the-shelf visual representations already carry veracity signal.
+
+Corrupt or truncated downloads are handled defensively: failed loads produce a zero embedding so that training can continue, at the cost of noise in the image stream.
+
+\subsection{Late-fusion classifier}
+
+Late fusion concatenates text and image embeddings:
+\begin{equation}
+h = [h_t; h_v], \qquad
+\hat{y} = \mathrm{MLP}(h),
+\end{equation}
+where $h_t$ is the RoBERTa CLS vector and $h_v$ is the CLIP image embedding.
+The MLP is a small fully connected classifier trained end-to-end with respect to the fusion head (and RoBERTa when unfrozen according to configuration), while CLIP remains frozen in our experiments.
+
+This design is intentionally simple.
+If fusion fails to beat text-only, the cause is unlikely to be an overly exotic architecture; rather, the visual modality may not add complementary information under the available labels and image quality.
+
+\subsection{Optimisation and reproducibility protocol}
+
+Training uses AdamW with a moderate learning rate, early stopping on validation macro-F1, and a fixed random seed where applicable.
+Checkpoints store the best validation model; final metrics are reported on the held-out test split.
+Implementation relies on PyTorch and Hugging Face Transformers; configuration files separate CONSTRAINT and MMCoVaR paths so that ablation runs share the same multimodal splits.
+
+Typical hyperparameters used in the delivered codebase include a batch size compatible with GPU memory, a maximum text length suitable for news bodies (with truncation), and a small number of fine-tuning epochs with patience-based early stopping.
+Macro-F1 is preferred over accuracy alone because MMCoVaR is class-imbalanced (more credible than misinfo articles in our downloaded subset).
+
+Reproducibility artefacts include JSONL splits, YAML configs, saved checkpoints, and JSON metric files under a project \texttt{results/} directory.
+Shell scripts orchestrate the three-way ablation so that text, image, and fusion runs differ only by the modality flag.
+
+\subsection{Metrics}
+
+For a binary prediction $\hat{y}$ against gold $y$, we report accuracy and the macro-averaged precision, recall, and F1:
+\begin{align}
+\mathrm{Precision}_c &= \frac{\mathrm{TP}_c}{\mathrm{TP}_c+\mathrm{FP}_c}, \quad
+\mathrm{Recall}_c = \frac{\mathrm{TP}_c}{\mathrm{TP}_c+\mathrm{FN}_c}, \\
+\mathrm{F1}_c &= \frac{2\,\mathrm{Precision}_c\,\mathrm{Recall}_c}{\mathrm{Precision}_c+\mathrm{Recall}_c}, \quad
+\mathrm{macro\text{-}F1} = \frac{1}{2}\sum_{c\in\{0,1\}} \mathrm{F1}_c.
+\end{align}
+Macro-F1 treats both classes equally and is therefore a fairer summary when class frequencies differ.
+
+\subsection{BERTopic narrative pipeline}
+
+After detection experiments, we aggregate documents labelled as misinformation from CONSTRAINT and MMCoVaR ($N=5{,}752$ after filtering).
+Long news bodies are truncated (for example to $800$ characters) for embedding efficiency.
+Documents are embedded with Sentence-Transformers \texttt{all-MiniLM-L6-v2}~\cite{reimers2019sentence} and clustered with BERTopic~\cite{grootendorst2022bertopic} (\texttt{min\_topic\_size}$=15$).
+Topic keywords are inspected qualitatively and renamed into human-readable themes for the taxonomy reported in Chapter~\ref{chap:experiments}.
+Topic names are human interpretations for descriptive analysis, not causal explanations of hesitancy.
+
+\subsection{Two evaluation protocols}
+\label{sec:two-protocols}
+
+We run the MMCoVaR text / image / fusion models under two protocols.
+
+\paragraph{Protocol A --- label-stratified (publisher overlap allowed).}
+Random stratified $70/15/15$ (seed~$42$).
+This matches a conventional benchmark setup and is the setting in which prior high F1 scores are easiest to over-interpret.
+
+\paragraph{Protocol B --- publisher-disjoint.}
+Publishers are grouped so that train, val, and test are source-disjoint.
+This tests source generalisation.
+Comparing A and B reveals the impact of publisher overlap (RQ2).
+
+Error analysis on CONSTRAINT is methodologically a manual FP/FN inspection with heuristic categories; counts and examples appear in Chapter~\ref{chap:experiments}.
+
+\section{Theoretical Results}
+\label{sec:theoretical-results}
+
+This thesis is primarily empirical; we do not claim new learning-theoretic bounds.
+Nevertheless, several modelling observations guide interpretation.
+
+First, under a missing-or-weak modality regime, late fusion behaves approximately like a text classifier if $\|h_v\|$ is uninformative or noisy.
+In the extreme, if $h_v$ is near zero (failed image loads) or poorly correlated with $y$, the fusion MLP can learn to ignore the image block, recovering text-only behaviour.
+This explains why fusion may match text without improving it.
+
+Second, publisher-level reliability is a surrogate label.
+Let $y$ denote publisher reliability and $z$ denote claim-level truth.
+If images correlate more with layout style than with $z$, while text correlates with both $y$ and $z$, then $\mathrm{I}(y;h_t) \gg \mathrm{I}(y;h_v)$ is expected, and image-only classifiers remain weak.
+Our ablation is therefore a test of mutual information between modalities and the available label, not a universal verdict against multimodality.
+
+Third, topic modelling is unsupervised clustering in embedding space.
+Themes are interpretable summaries, not causal explanations of hesitancy.
+They should be treated as decision-support for communication analysis, validated by human reading of representative documents.
+
+% ============================================
+% CHAPTER 4: EXPERIMENTS
+% ============================================
+
+\chapter{Experiments}
+\label{chap:experiments}
+
+This chapter evaluates five related questions:
+(i)~text classification on CONSTRAINT;
+(ii)~the contribution of image vs.\ text on MMCoVaR;
+(iii)~whether late fusion beats single modalities under a label-stratified split;
+(iv)~how scores change after removing publisher overlap;
+(v)~which narratives appear in the misinformation corpus.
+
+\section{Experimental Setup}
+\label{sec:setup}
+
+\subsection{Hardware and software}
+
+We use Python with PyTorch, Hugging Face Transformers, CLIP, BERTopic, and scikit-learn.
+GPU or Apple MPS is used when available.
+Scripts reload the best checkpoint and report accuracy, precision, recall, and macro-F1 on fixed JSONL splits.
+
+\subsection{Experiment A: CONSTRAINT text baseline}
+
+We compare TF--IDF + class-balanced logistic regression with fine-tuned RoBERTa on the official CONSTRAINT splits.
+The goal is to set a classical baseline and check whether a contextual Transformer improves over lexical features.
+
+\subsection{Experiment B: MMCoVaR multimodal ablation (label-stratified)}
+
+On the multimodal MMCoVaR subset we train three models on the same \emph{label-stratified} split (seed~$42$):
+text-only RoBERTa, image-only CLIP (frozen encoder + linear head), and late fusion (RoBERTa CLS + CLIP image embedding + MLP).
+The goal is to measure modality contribution and whether fusion beats single modalities.
+These splits later turn out to be publisher-leaky (Section~\ref{sec:publisher-overlap}).
+
+\subsection{Experiment C: Publisher-disjoint retraining}
+
+We rebuild MMCoVaR so that no publisher appears in more than one of train/val/test (seed~$42$, target $\approx 70/15/15$ by article count).
+The new audit reports $0$ shared publishers and $0\%$ test articles with a training publisher.
+We retrain the same three models with the same hyperparameters on \texttt{data/splits\_mmcovar\_pubdisjoint} (results in \texttt{results/pubdisjoint/}).
+Split sizes: train $1{,}499$ (12 publishers), val $325$ (8), test $307$ (42).
+The goal is to test publisher leakage / source-style shortcuts.
+
+\subsection{Experiment D: BERTopic taxonomy and CONSTRAINT errors}
+
+BERTopic is run on the aggregated misinformation corpus to recover dominant themes.
+We also inspect all RoBERTa errors on CONSTRAINT test.
+The goal is to describe the misinformation \emph{ecosystem}, not only classification scores.
+
+\section{Results}
+\label{sec:results}
+
+\subsection{CONSTRAINT: Transformer vs classical baseline}
+
+Table~\ref{tab:constraint-results} reports test metrics.
+RoBERTa reaches macro-F1~$0.9719$ versus $0.9224$ for TF--IDF+LR---a gap of about $0.05$ (roughly five macro-F1 points).
+
+\begin{table}[htbp]
+\centering
+\caption{CONSTRAINT test results: classical vs Transformer text classifiers.}
+\label{tab:constraint-results}
+\begin{tabular}{lcccc}
+\hline
+Model & Accuracy & Precision & Recall & Macro-F1 \\
+\hline
+TF--IDF + Logistic Regression & 0.9224 & 0.9222 & 0.9230 & 0.9224 \\
+RoBERTa-base (text) & 0.9720 & 0.9717 & 0.9723 & 0.9719 \\
+\hline
+\end{tabular}
+\end{table}
+
+TF--IDF mainly captures lexical patterns; RoBERTa uses contextual representations of wording and local context.
+For RQ1, the contextual Transformer clearly outperforms the classical baseline on CONSTRAINT.
+A high CONSTRAINT score still does \emph{not} prove that misinformation detection is ``solved'', nor that the model will generalise to unseen sources---the MMCoVaR audit below makes that caveat concrete.
+
+\subsection{Error analysis on CONSTRAINT}
+
+On the CONSTRAINT test set ($2{,}140$ samples) RoBERTa makes $60$ errors ($\approx 2.8\%$): $38$ false positives and $22$ false negatives.
+Heuristic categories are listed in Table~\ref{tab:error-cats}.
+
+\begin{table}[htbp]
+\centering
+\caption{Heuristic categories of RoBERTa errors on CONSTRAINT test ($N=60$).}
+\label{tab:error-cats}
+\begin{tabular}{lr}
+\hline
+Category & Count \\
+\hline
+Subtle / hedged misinfo missed (FN) & 20 \\
+Stylistic false alarm (FP) & 16 \\
+Short / ambiguous text & 16 \\
+Hedged but credible (FP) & 3 \\
+Alarmist but credible (FP) & 3 \\
+Politicised credible (FP) & 1 \\
+Miracle-cure missed (FN) & 1 \\
+\hline
+\end{tabular}
+\end{table}
+
+False negatives often use hedging (``may'', ``could'', ``possibly'') and look like calm informational text; misinformation is not always written in extreme language.
+False positives often use alarmist or sensational wording even when the gold label is credible, so the model may react to \emph{style} rather than verified claim truth.
+Short or ambiguous posts lack local context and are hard to judge from text alone.
+Residual errors are therefore patterned (stylistic boundary, hedging, ambiguity), which foreshadows the source-style leakage issue on MMCoVaR.
+
+\subsection{MMCoVaR modality ablation (label-stratified, leaky)}
+
+Table~\ref{tab:ablation} summarises the stratified ablation.
+
+\begin{table}[htbp]
+\centering
+\caption{MMCoVaR test ablation on \emph{label-stratified} splits (publisher-leaky).}
+\label{tab:ablation}
+\begin{tabular}{lcccc}
+\hline
+Modality & Accuracy & Precision & Recall & Macro-F1 \\
+\hline
+Text-only   & 0.9688 & 0.9658 & 0.9604 & 0.9630 \\
+Image-only  & 0.5969 & 0.5550 & 0.5613 & 0.5542 \\
+Late fusion & 0.9688 & 0.9632 & 0.9632 & 0.9632 \\
+\hline
+\end{tabular}
+\end{table}
+
+Text is strong (macro-F1~$0.9630$)---close to the RoBERTa level in Experiment~A---and is the main modality under this protocol; the dataset carries a strong textual signal.
+Image-only is weak ($0.5542$): images are often decorative, do not directly encode truthfulness, frozen CLIP may miss claim semantics, and some URLs fail.
+Late fusion reaches $0.9632$---only $+0.0002$ over text---so under the stratified split, image information does not provide a measurable improvement over text.
+Text already looks near a ceiling under this publisher-overlapping protocol.
+Absolute F1 alone may be misleading when the same publishers occur across train and test; the next subsection audits that overlap.
+
+\subsection{Publisher-overlap audit}
+\label{sec:publisher-overlap}
+
+MMCoVaR labels are publisher reliability, not claim-level fact-checks.
+Table~\ref{tab:publisher-overlap} audits the stratified splits (artefact: \texttt{results/publisher\_overlap\_mmcovar.json}).
+
+\begin{table}[htbp]
+\centering
+\caption{Publisher-overlap audit on MMCoVaR stratified splits (seed~$42$).}
+\label{tab:publisher-overlap}
+\begin{tabular}{lr}
+\hline
+Metric & Value \\
+\hline
+Unique publishers (train / val / test) & 57 / 41 / 39 \\
+Publishers in train $\cap$ test & 37 \\
+Jaccard(train, test) & 0.627 \\
+Test articles whose publisher appears in train & 318 / 320 ($99.4\%$) \\
+\hline
+\end{tabular}
+\end{table}
+
+Train and test are \emph{not} publisher-disjoint: $37$ publishers appear in both, Jaccard similarity is $0.627$, and $318/320$ ($99.4\%$) of test articles come from a publisher already seen in training.
+The high publisher overlap raises a strong concern that part of the performance is driven by source-specific signals (style, vocabulary, recurring phrases, editorial patterns): the model may recognise ``this looks like publisher~A'' instead of verifying the claim.
+The modality ranking under the leaky split remains descriptively useful because all three models share the same leakage, but it is not evidence of claim-level generalisation or unseen-source robustness.
+
+\subsection{Publisher-disjoint ablation}
+\label{sec:pubdisjoint}
+
+To test the leakage concern directly, we rebuild splits with zero publisher overlap and retrain text, image, and fusion from scratch.
+Table~\ref{tab:ablation-pubdisjoint} gives full test metrics; Table~\ref{tab:ablation-compare} compares macro-F1 with the leaky protocol.
+
+\begin{table}[htbp]
+\centering
+\caption{MMCoVaR test ablation on \emph{publisher-disjoint} splits (overlap~$0\%$).}
+\label{tab:ablation-pubdisjoint}
+\begin{tabular}{lcccc}
+\hline
+Modality & Accuracy & Precision & Recall & Macro-F1 \\
+\hline
+Text-only   & 0.6775 & 0.5911 & 0.5106 & 0.4398 \\
+Image-only  & 0.6645 & 0.5584 & 0.5221 & 0.4887 \\
+Late fusion & 0.6938 & 0.6547 & 0.5491 & 0.5192 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Macro-F1 under leaky vs publisher-disjoint protocols.}
+\label{tab:ablation-compare}
+\begin{tabular}{lcc}
+\hline
+Modality & Stratified (leaky) & Publisher-disjoint \\
+\hline
+Text-only   & 0.9630 & 0.4398 \\
+Image-only  & 0.5542 & 0.4887 \\
+Late fusion & 0.9632 & 0.5192 \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Finding 1: text collapses.}
+Text falls from $0.9630$ to $0.4398$ (drop $0.5232$ F1)---the largest change.
+Performance under the original split depended heavily on signals that do not transfer to unseen publishers.
+We do \emph{not} say the text model is useless; we say its performance was highly sensitive to the evaluation protocol.
+
+\paragraph{Finding 2: fusion also drops.}
+Fusion falls from $0.9632$ to $0.5192$ (drop $0.4440$).
+Fusion still contains text, so publisher-specific textual signals still affect it.
+
+\paragraph{Finding 3: fusion now beats text.}
+Under the disjoint protocol, fusion ($0.5192$) exceeds text ($0.4398$) by $0.0794$ (about eight macro-F1 points).
+When text is no longer near a ceiling, visual information can contribute.
+The improvement is modest, not transformational: we do not claim that multimodal fusion solves misinformation detection.
+
+\paragraph{Finding 4: image is no longer far behind.}
+Image moves from $0.5542$ to $0.4887$ (drop $0.0655$), while text drops by $0.5232$.
+After removing source shortcuts, modality gaps shrink (fusion~$0.5192$, image~$0.4887$, text~$0.4398$).
+Text appears most dependent on publisher-specific signals; the relative value of vision rises once those shortcuts are removed.
+
+\paragraph{Finding 5: pattern matches the leakage hypothesis.}
+Before (overlap): text$\approx$fusion$\approx 0.963$, image$\approx 0.554$.
+After (disjoint): text~$0.440$, fusion~$0.519$, image~$0.489$.
+The dramatic reduction in text performance after removing publisher overlap is consistent with the hypothesis that the original split allowed models to exploit source-specific textual patterns.
+
+\paragraph{Validation caveat.}
+Although the disjoint validation set was more class-imbalanced, the large change observed on the held-out test set remains the central result for RQ2.
+
+\subsection{Narrative taxonomy (BERTopic)}
+
+Table~\ref{tab:taxonomy} lists the largest themes after qualitative renaming.
+Dominant groups include sensational case/death claims, politicisation, masks, lab-origin narratives, miracle cures, elite/institutional distrust, hospital imagery, and schools/children anxieties.
+
+\begin{table}[htbp]
+\centering
+\caption{Top themes in the misinformation corpus (BERTopic + qualitative labels).}
+\label{tab:taxonomy}
+\small
+\begin{tabular}{clrp{5.0cm}}
+\hline
+\# & Theme & Size & Interpretation \\
+\hline
+1 & Case/death sensationalism & 520 & Inflated or misleading severity narratives \\
+2 & Politicised pandemic framing & 500 & Partisan blame / political weaponisation \\
+3 & Contested public measures (masks) & 214 & Contestation of NPIs mixed with rumour \\
+4 & China / lab-origin claims & 188 & Origin conspiracies and geopolitical blame \\
+5 & Miracle-cure / unproven drugs & 116 & HCQ and similar treatment myths \\
+6 & Elite / Bill Gates vaccine distrust & 112 & Agenda and control conspiracies \\
+7 & Hospital-overload visuals & 97 & Misleading crisis imagery \\
+8 & Schools / children anxieties & 82 & Child-focused risk rumours \\
+9 & Folk home remedies & 79 & Salt/steam/garlic ``cures'' \\
+10 & Travel-ban rumours & 76 & False policy / mobility claims \\
+\hline
+\end{tabular}
+\end{table}
+
+Roughly one third of documents may fall into an outlier topic; that is expected for short or noisy text and does not make the large themes meaningless.
+We frame the corpus as a \emph{COVID misinformation ecosystem} (health claims, politics, conspiracy, distrust, treatments, fear narratives), not as a pure vaccine-hesitancy survey.
+Some themes are only \emph{indirectly} related to hesitancy; a topic is a content cluster, not proof of a reader's psychological intention.
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Two protocols, two stories for RQ2}
+
+Under the leaky stratified split: text~$0.9630$, fusion~$0.9632$, image~$0.5542$ --- text dominates and fusion adds almost nothing.
+Under the publisher-disjoint split: fusion~$0.5192$, image~$0.4887$, text~$0.4398$ --- overall performance collapses, but fusion becomes the strongest modality.
+RQ2 therefore has no single answer unless the evaluation protocol is specified; changing the protocol changes the scientific interpretation.
+RQ1 remains the CONSTRAINT gap (RoBERTa~$0.9719$ vs TF--IDF~$0.9224$).
+
+\subsection{Why fusion looked useless under leakage, then slightly useful}
+
+Under publisher overlap, text is already strong (long bodies; publisher-specific style encoded in text), images are often decorative, CLIP is frozen, some URLs fail, and publisher labels are partly available through text---so the image stream has little room to improve.
+Under publisher-disjoint evaluation, text performance drops sharply, text is no longer near a ceiling, and fusion ($0.5192$) exceeds text ($0.4398$).
+Multimodal information appears more useful under the harder source-disjoint setting; the gain remains modest, and we still do not claim that fusion solves veracity or that multimodal is inherently better.
+
+\subsection{Narratives and hesitancy}
+
+The taxonomy is broader than vaccine hesitancy alone: health claims, masks, treatments, conspiracy, political framing, and institutional distrust all appear.
+Some clusters may contribute indirectly to hesitancy or distrust of public-health measures, but BERTopic only summarises content themes; it does not measure reader intention.
+
+\subsection{Reading high accuracy under leakage}
+
+A stratified macro-F1 near $0.96$ should \emph{not} be read as ``the model detects misinformation at $96\%$ macro-F1 in the real world''.
+It should be read as high performance under the original publisher-overlapping benchmark.
+After the audit ($99.4\%$ of test articles share a publisher with training) and the disjoint retrain (text $0.963\rightarrow 0.440$; fusion $0.963\rightarrow 0.519$), the qualitative leakage concern becomes a quantitative measurable drop.
+High benchmark performance is not the same as strong generalisation.
+
+\paragraph{Empirical takeaways.}
+(1)~RoBERTa clearly outperforms TF--IDF+LR on CONSTRAINT.
+(2)~Under the stratified split, text$\approx$fusion$\gg$image.
+(3)~The audit finds large publisher overlap ($318/320$ test articles).
+(4)~Under publisher-disjoint evaluation, text collapses while fusion becomes the strongest modality (absolute F1 remains moderate).
+(5)~\emph{Leakage---not fusion architecture---is the central empirical lesson.}
+% ============================================
+% CHAPTER 5: CONCLUSION
+% ============================================
+
+\chapter{Conclusion}
+\label{chap:conclusion}
+
+\section{Summary}
+\label{sec:summary}
+
+This internship thesis asked three questions about content-level COVID-19 / vaccine misinformation detection and narrative analysis on English pandemic-period data (primarily 2020--2021 CONSTRAINT text and MMCoVaR news---not live TikTok).
+RQ1: RoBERTa macro-F1~$0.9719$ clearly exceeds TF--IDF~$0.9224$ on CONSTRAINT.
+RQ2: under leaky stratified MMCoVaR splits, text~$\approx$fusion~$0.96$ and image~$0.55$; under publisher-disjoint splits (overlap~$0\%$), scores collapse to text~$0.4398$, image~$0.4887$, fusion~$0.5192$.
+The audit ($99.4\%$ publisher overlap) and the disjoint drop show that the high stratified F1 was largely source leakage; fusion becomes strongest only under the harder protocol, and absolute F1 stays moderate.
+RQ3: BERTopic on $5{,}752$ misinformation documents yields a multi-theme COVID misinformation ecosystem; some themes relate to hesitancy only indirectly.
+The accompanying codebase makes both protocols reproducible.
+
+\section{Limitations}
+\label{sec:limitations}
+
+Two limitations dominate any honest reading of the results and are stated first.
+
+\begin{itemize}
+  \item \textbf{Publisher leakage vs disjoint generalisation:}
+        MMCoVaR uses publisher-level reliability.
+        On stratified splits, $318/320$ ($99.4\%$) of test articles share a publisher with train, and text/fusion reach macro-F1~$\approx 0.96$.
+        Under publisher-disjoint splits the same models drop to $\approx 0.44$--$0.52$, so claim-level detection remains unsolved.
+        Disjoint validation is also class-imbalanced (few misinfo publishers in val), which adds early-stopping noise.
+  \item \textbf{Temporal and platform scope:}
+        Datasets are mainly from 2020--2021.
+        This is \emph{not} a study of post-2023 live discourse.
+        Multimodal experiments use MMCoVaR \emph{news articles}, not a live X/TikTok corpus; CONSTRAINT provides social text but without images.
+        Whisper audio was not implemented.
+\end{itemize}
+
+Additional limitations follow.
+
+\begin{itemize}
+  \item \textbf{Statistical robustness:} reported neural runs use a fixed seed configuration; multi-seed significance tests for the tiny fusion delta were not performed.
+  \item \textbf{Vision setup:} CLIP is frozen and many news images are decorative; weak image-only scores do not prove that images are universally uninformative for misinformation.
+  \item \textbf{Topic corpus mix:} a large share of BERTopic documents comes from CONSTRAINT (broad COVID fake news), so themes should be read as a COVID misinformation ecosystem, not as a pure vaccine-hesitancy survey.
+  \item \textbf{BERTopic stability:} topics depend on seeds/parameters; roughly one-third of documents may fall into outliers and require human validation.
+  \item \textbf{Language:} English-centric data; Vietnamese transfer is untested.
+  \item \textbf{Data quality:} about $18\%$ of MMCoVaR image URLs failed to download.
+\end{itemize}
+Ethically, detectors can support public-health response but also risk over-blocking legitimate debate or satire; outputs should be treated as decision support with human review.
+
+\section{Future Work}
+\label{sec:future-work}
+
+Several directions follow directly from the limitations above.
+
+First, move from publisher reliability to \emph{claim-level} fact-checked labels (or human adjudication of contested articles) so that disjoint splits test veracity rather than unseen-source style alone.
+Second, true short-video multimodality requires TikTok (or similar) frames together with Whisper transcripts.
+Third, architectural upgrades---cross-attention fusion and unfrozen vision towers---may unlock more image signal once labels are claim-level.
+Fourth, multi-seed evaluation and better-balanced disjoint partitions would support significance claims for small fusion deltas.
+Fifth, a multilingual evaluation set including Vietnamese would increase local relevance for USTH.
+Sixth, an interactive dashboard linking classifier scores to narrative trends would turn the pipeline into an operational monitoring tool.
+
+These extensions preserve the core finding of this thesis: high multimodal scores under publisher-leaky splits can be illusory; audit leakage, report a harder disjoint protocol, keep strong text baselines, and couple detection with narrative analysis.
+
+% ============================================
+% BIBLIOGRAPHY
+% ============================================
+% add the reference into file "biblio.bib" in bibtext format. 
+\clearpage
+
+\addcontentsline{toc}{chapter}{References}
+\printbibliography[title=References]
+
+\end{document}

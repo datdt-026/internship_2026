@@ -1,0 +1,52 @@
+# MMCoVaR publisher-disjoint ablation (no shared publishers across splits)
+project:
+  name: vaccine-misinfo-mmcovar-pubdisjoint
+  seed: 42
+  output_dir: results/pubdisjoint
+  checkpoint_dir: checkpoints/pubdisjoint
+
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  splits_dir: data/splits_mmcovar_pubdisjoint
+  source: mmcovar_news_pubdisjoint
+  text_column: text
+  image_column: image_path
+  label_column: label
+  label_map:
+    credible: 0
+    misinfo: 1
+  max_text_length: 256
+  num_workers: 0
+
+model:
+  modality: fusion
+  text_encoder: roberta-base
+  image_encoder: openai/clip-vit-base-patch32
+  freeze_image_encoder: true
+  fusion: late
+  dropout: 0.2
+  num_labels: 2
+
+train:
+  batch_size: 8
+  eval_batch_size: 16
+  learning_rate: 2.0e-5
+  weight_decay: 0.01
+  num_epochs: 5
+  early_stopping_patience: 2
+  fp16: false
+  gradient_accumulation_steps: 1
+  logging_steps: 20
+  save_total_limit: 2
+
+eval:
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1
+  average: macro
+
+topics:
+  enabled: false
